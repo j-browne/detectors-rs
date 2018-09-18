@@ -1,0 +1,9 @@
+[package]
+name = "code"
+version = "0.1.0"
+authors = ["brownie"]
+edition = "2018"
+
+[dependencies]
+nalgebra = "*"
+GSL = "*"
