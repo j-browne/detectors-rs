@@ -71,6 +71,12 @@ impl Detector {
     pub fn add_transformation(&mut self, t: Transformation) {
         self.transformations.push(t);
     }
+
+    // Surface area
+    // dS = dr/du x dr/dv
+
+    // Solid angle
+    // dΩ = r.dS / |r|^3
 }
 
 
