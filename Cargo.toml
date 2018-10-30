@@ -5,10 +5,9 @@ authors = ["brownie"]
 edition = "2018"
 
 [dependencies]
-nalgebra = "*"
 GSL = "*"
-serde = "*"
-serde_derive = "*"
-serde_json = "*"
+nalgebra = "*"
 rayon = "*"
+ron = "*"
+serde = "*"
 structopt = "*"

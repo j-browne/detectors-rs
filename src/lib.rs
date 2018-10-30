@@ -1,26 +1,26 @@
-#![feature(custom_attribute)]
-#[macro_use]
-extern crate serde_derive;
+//#![feature(custom_attribute)]
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
+pub use crate::error::Error;
+
+pub mod error;
 
 pub fn get_detectors_from_files<T, U>(
     name_dets: T,
     name_det_types: U,
-) -> Result<Vec<Vec<Detector>>, std::io::Error>
+) -> Result<Vec<Vec<Detector>>, Error>
 where
     T: AsRef<Path>,
     U: AsRef<Path>,
 {
     let file = File::open(name_det_types)?;
     let file = BufReader::new(file);
-    let detector_types: HashMap<String, DetectorType> = serde_json::from_reader(file)?;
+    let detector_types: HashMap<String, DetectorType> = ron::de::from_reader(file)?;
     let file = File::open(name_dets)?;
     let file = BufReader::new(file);
-    let detectors: Vec<DetectorBuilder> = serde_json::from_reader(file)?;
+    let detectors: Vec<DetectorBuilder> = ron::de::from_reader(file)?;
 
     let mut dets = Vec::with_capacity(detectors.len());
     for d in &detectors {
@@ -230,7 +230,7 @@ impl CoordinateSystem {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum Transformation {
     #[serde(serialize_with = "serialize_rotation")]
     #[serde(deserialize_with = "deserialize_rotation")]
@@ -239,7 +239,7 @@ pub enum Transformation {
     #[serde(deserialize_with = "deserialize_translation")]
     Translation(Translation3<f64>),
 }
-/*
+
 impl std::fmt::Debug for Transformation {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
@@ -261,7 +261,7 @@ impl std::fmt::Debug for Transformation {
         Ok(())
     }
 }
-*/
+
 fn serialize_rotation<S: serde::Serializer>(r: &Rotation3<f64>, s: S) -> Result<S::Ok, S::Error> {
     let r = r.scaled_axis().data;
     (r[0].to_degrees(), r[1].to_degrees(), r[2].to_degrees()).serialize(s)
@@ -349,12 +349,11 @@ fn integral_2d<'a>(
 //        * anywhere along the edges where the 1D deriv is 0
 //        * anywhere the 2D deriv is 0
 //        pick the min from that list
-fn minimize_1d<'a>(
+pub fn minimize_1d<'a>(
     f: &'a Fn(f64) -> f64,
     lim: (f64, f64),
-    eps: (f64, f64),
+    _eps: (f64, f64),
 ) -> (f64, f64) {
-    /*
     let mut candidates = Vec::new(); //TODO: Priority Queue?
 
     // Add ends
@@ -365,18 +364,16 @@ fn minimize_1d<'a>(
     //
 
     candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("unable to compare two candiates in minimize_1d").reverse());
-    candidates.pop().expect("unfilled candidates vec in minimize_1d")
-    */
+    candidates.pop().expect("unfilled candidates vec in minimize_1d");
     unimplemented!()
 }
 
-fn minimize_2d<'a>(
+pub fn minimize_2d<'a>(
     f_2d: &'a Fn(f64, f64) -> f64,
     u_lim: (f64, f64),
     v_lim: (f64, f64),
-    eps: (f64, f64),
+    _eps: (f64, f64),
 ) -> ((f64, f64), f64) {
-    /*
     let mut candidates = Vec::new(); //TODO: Priority Queue?
 
     // Add corners
@@ -389,8 +386,7 @@ fn minimize_2d<'a>(
     // Add points where 2D deriv is 0
 
     candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("unable to compare two candiates in minimize_2d").reverse());
-    candidates.pop().expect("unfilled candidates vec in minimize_2d")
-    */
+    candidates.pop().expect("unfilled candidates vec in minimize_2d");
     unimplemented!()
 }
 
