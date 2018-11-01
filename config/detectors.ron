@@ -66,11 +66,71 @@
     ],
   ),
   // E8
+  (
+    type: "BB15F",
+    transformations: [
+      Rotation((90,0,0)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,30)),
+    ],
+  ),
   // E9
+  (
+    type: "BB15F",
+    transformations: [
+      Rotation((90,0,0)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,60)),
+    ],
+  ),
   // E10
+  (
+    type: "BB15F",
+    transformations: [
+      Rotation((90,0,0)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,90)),
+    ],
+  ),
   // E11
+  (
+    type: "BB15F",
+    transformations: [
+      Rotation((90,0,0)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,120)),
+    ],
+  ),
   // E13
+  (
+    type: "BB15F",
+    transformations: [
+      Rotation((90,0,0)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,300)),
+    ],
+  ),
   // E14
+  (
+    type: "BB15F",
+    transformations: [
+      Rotation((90,0,0)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,330)),
+    ],
+  ),
   // E15
   (
     type: "YY1F",
