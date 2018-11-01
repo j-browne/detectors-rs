@@ -1,8 +1,7 @@
-use std::sync::Mutex;
-use detectors_rs::get_detectors_from_files;
+use std::{sync::Mutex, path::Path, fs::File, io::BufReader};
 use rayon::prelude::*;
 use structopt::{clap::AppSettings, StructOpt};
-use detectors_rs::Error;
+use detectors_rs::{Error, Detector, dets_from_readers};
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "detectors", about = "A program to calculate detector properties.", version="", author = "", raw(global_settings = "&[AppSettings::DisableVersion]"))]
@@ -15,11 +14,11 @@ struct Opt {
 
 fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
-    let dets = get_detectors_from_files(opt.det_file, opt.types_file)?;
+    let dets = dets_from_names(opt.det_file, opt.types_file)?;
     let output = Mutex::new(Vec::new());
     dets.par_iter().enumerate().for_each(|(i, d)| {
         d.par_iter().enumerate().for_each(|(j, s)| {
-            output.lock().unwrap().push((i + 1, j, s.solid_angle()));
+            output.lock().unwrap().push((i + 1, j, s.th_avg(), s.phi_avg(), s.solid_angle()));
         });
     });
 
@@ -27,8 +26,23 @@ fn main() -> Result<(), Error> {
     output.sort_by_key(|x| x.1);
     output.sort_by_key(|x| x.0);
 
-    for (det, chan, solid_angle) in output {
-        println!("{} {} {}", det, chan, solid_angle);
+    for (det, chan, th_avg, phi_avg, solid_angle) in output {
+        println!("{}\t{}\t{}\t{}\t{}", det, chan, th_avg, phi_avg, solid_angle);
     }
     Ok(())
+}
+
+fn dets_from_names<T, U>(
+    name_dets: T,
+    name_det_types: U,
+) -> Result<Vec<Vec<Detector>>, Error>
+where
+    T: AsRef<Path>,
+    U: AsRef<Path>,
+{
+    let file_dets = File::open(name_dets)?;
+    let file_dets = BufReader::new(file_dets);
+    let file_types = File::open(name_det_types)?;
+    let file_types = BufReader::new(file_types);
+    dets_from_readers(file_dets, file_types)
 }

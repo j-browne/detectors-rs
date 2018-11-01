@@ -2,25 +2,21 @@
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
+use std::{collections::HashMap, io::Read};
 pub use crate::error::Error;
 
 pub mod error;
 
-pub fn get_detectors_from_files<T, U>(
-    name_dets: T,
-    name_det_types: U,
+pub fn dets_from_readers<T, U>(
+    reader_dets: T,
+    reader_det_types: U,
 ) -> Result<Vec<Vec<Detector>>, Error>
 where
-    T: AsRef<Path>,
-    U: AsRef<Path>,
+    T: Read,
+    U: Read,
 {
-    let file = File::open(name_det_types)?;
-    let file = BufReader::new(file);
-    let detector_types: HashMap<String, DetectorType> = ron::de::from_reader(file)?;
-    let file = File::open(name_dets)?;
-    let file = BufReader::new(file);
-    let detectors: Vec<DetectorBuilder> = ron::de::from_reader(file)?;
+    let detector_types: HashMap<String, DetectorType> = ron::de::from_reader(reader_det_types)?;
+    let detectors: Vec<DetectorBuilder> = ron::de::from_reader(reader_dets)?;
 
     let mut dets = Vec::with_capacity(detectors.len());
     for d in &detectors {
@@ -97,6 +93,15 @@ impl Detector {
         let m = Minimizer::new();
     }
     */
+    pub fn th_avg(&self) -> f64 {
+        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_th() * self.d_solid_angle(Point2::new(u, v));
+        integral_2d(&f, self.u_lim, self.v_lim, (1e-8, 1e-5)) / self.solid_angle()
+    }
+
+    pub fn phi_avg(&self) -> f64 {
+        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_phi() * self.d_solid_angle(Point2::new(u, v));
+        integral_2d(&f, self.u_lim, self.v_lim, (1e-8, 1e-5)) / self.solid_angle()
+    }
 
     pub fn d_solid_angle(&self, p: Point2<f64>) -> f64 {
         let fu: fn(f64, &mut (f64, &Detector, usize)) -> f64 =
@@ -406,7 +411,7 @@ impl Spherical for Point3<f64> {
         f64::acos(self[2] / r).to_degrees()
     }
     fn sphere_phi(&self) -> f64 {
-        f64::atan2(self[1], self[0]).to_degrees()
+        f64::atan2(self[0], self[1]).to_degrees()
     }
 
     fn sphere(&self) -> (f64, f64, f64) {
