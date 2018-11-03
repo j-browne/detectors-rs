@@ -18,7 +18,10 @@ fn main() -> Result<(), Error> {
     let output = Mutex::new(Vec::new());
     dets.par_iter().enumerate().for_each(|(i, d)| {
         d.par_iter().enumerate().for_each(|(j, s)| {
-            output.lock().unwrap().push((i + 1, j, s.th_avg(), s.phi_avg(), s.solid_angle()));
+            output.lock().unwrap().push((i + 1, j,
+                                         s.th_min(), s.th_max(), s.th_avg(),
+                                         s.phi_min(), s.phi_max(), s.phi_avg(),
+                                         s.solid_angle()));
         });
     });
 
@@ -26,8 +29,8 @@ fn main() -> Result<(), Error> {
     output.sort_by_key(|x| x.1);
     output.sort_by_key(|x| x.0);
 
-    for (det, chan, th_avg, phi_avg, solid_angle) in output {
-        println!("{}\t{}\t{}\t{}\t{}", det, chan, th_avg, phi_avg, solid_angle);
+    for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
+        println!("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
     }
     Ok(())
 }

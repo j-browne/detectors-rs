@@ -89,15 +89,29 @@ impl Detector {
         self.coords.backward(p)
     }
 
-    /*
     pub fn th_min(&self) -> f64 {
-        use rgsl::MinimizerType::Gauss15;
-        let m = Minimizer::new();
+        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_th();
+        minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
     }
-    */
+
+    pub fn th_max(&self) -> f64 {
+        let f = |u, v| -self.forward(Point2::new(u ,v)).sphere_th();
+        -minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
+    }
+
     pub fn th_avg(&self) -> f64 {
         let f = |u, v| self.forward(Point2::new(u ,v)).sphere_th() * self.d_solid_angle(Point2::new(u, v));
         integral_2d(&f, self.u_lim, self.v_lim, (1e-8, 1e-5)) / self.solid_angle()
+    }
+
+    pub fn phi_min(&self) -> f64 {
+        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_phi();
+        minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
+    }
+
+    pub fn phi_max(&self) -> f64 {
+        let f = |u, v| -self.forward(Point2::new(u ,v)).sphere_phi();
+        -minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
     }
 
     pub fn phi_avg(&self) -> f64 {
@@ -235,6 +249,8 @@ impl CoordinateSystem {
             }
         }
     }
+
+    
 }
 
 #[derive(Serialize, Deserialize, Clone)]
