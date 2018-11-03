@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 GSL = "*"
 nalgebra = "*"
+ndarray = "*"
+optimize = "*"
 rayon = "*"
 ron = "*"
 serde = "*"

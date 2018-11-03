@@ -1,5 +1,7 @@
 //#![feature(custom_attribute)]
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
+use ndarray::{Array, ArrayView1};
+use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, io::Read};
@@ -348,51 +350,43 @@ fn integral_2d<'a>(
     result
 }
 
-// FIXME: This doesn't work
-//        Instead, make a list of:
-//        * the corners
-//        * anywhere along the edges where the 1D deriv is 0
-//        * anywhere the 2D deriv is 0
-//        pick the min from that list
 pub fn minimize_1d<'a>(
     f: &'a Fn(f64) -> f64,
     lim: (f64, f64),
-    _eps: (f64, f64),
+    eps: f64,
 ) -> (f64, f64) {
-    let mut candidates = Vec::new(); //TODO: Priority Queue?
+    let minimizer = NelderMeadBuilder::default()
+        .adaptive(true)
+        .ftol(eps)
+        .build()
+        .unwrap();// FIXME
 
-    // Add ends
-    candidates.push((lim.0, f(lim.0)));
-    candidates.push((lim.1, f(lim.1)));
+    let func = |x: ArrayView1<f64>| if x[0] < lim.0 || x[0] > lim.1 { std::f64::INFINITY } else { f(x[0]) };
+    let mid = Array::from_vec(vec![(lim.0 + lim.1) / 2.0]);
 
-    // Add points where deriv is 0
-    //
+    let x = minimizer.minimize(func, mid.view());
 
-    candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("unable to compare two candiates in minimize_1d").reverse());
-    candidates.pop().expect("unfilled candidates vec in minimize_1d");
-    unimplemented!()
+    (x[0], f(x[0]))
 }
 
 pub fn minimize_2d<'a>(
-    f_2d: &'a Fn(f64, f64) -> f64,
+    f: &'a Fn(f64, f64) -> f64,
     u_lim: (f64, f64),
     v_lim: (f64, f64),
-    _eps: (f64, f64),
+    eps: f64,
 ) -> ((f64, f64), f64) {
-    let mut candidates = Vec::new(); //TODO: Priority Queue?
+    let minimizer = NelderMeadBuilder::default()
+        .adaptive(true)
+        .ftol(eps)
+        .build()
+        .unwrap();// FIXME
 
-    // Add corners
-    candidates.push(((u_lim.0, v_lim.0), f_2d(u_lim.0, v_lim.0)));
-    candidates.push(((u_lim.0, v_lim.1), f_2d(u_lim.0, v_lim.1)));
-    candidates.push(((u_lim.1, v_lim.0), f_2d(u_lim.1, v_lim.0)));
-    candidates.push(((u_lim.1, v_lim.1), f_2d(u_lim.1, v_lim.1)));
+    let func = |x: ArrayView1<f64>| if x[0] < u_lim.0 || x[0] > u_lim.1 || x[1] < v_lim.0 || x[1] > v_lim.1 { std::f64::INFINITY } else { f(x[0], x[1]) };
+    let mid = Array::from_vec(vec![(u_lim.0 + u_lim.1) / 2.0, (v_lim.0 + v_lim.1) / 2.0]);
 
-    // Add minima of Edges, use minimize_1d? Do you need corners then?
-    // Add points where 2D deriv is 0
+    let x = minimizer.minimize(func, mid.view());
 
-    candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("unable to compare two candiates in minimize_2d").reverse());
-    candidates.pop().expect("unfilled candidates vec in minimize_2d");
-    unimplemented!()
+    ((x[0], x[1]), f(x[0], x[1]))
 }
 
 pub trait Spherical {
@@ -428,12 +422,33 @@ mod tests {
 
     #[test]
     fn test_minimize_1d() {
+        let mut output = Vec::new();
+
         let f = |x: f64| (x - 2.5).powi(2) + 4.0;
-        println!("{:?}", minimize_1d(&f, (1.0, 3.0), (1e-5, 1e-4)));
-        println!("{:?}", minimize_1d(&f, (3.0, 10.0), (1e-5, 1e-4)));
+
+        for ulim in [(-1.0, 1.0), (1.0, 3.0), (3.0, 10.0)].into_iter() {
+            output.push((ulim, minimize_1d(&f, *ulim, 1e-4)));
+        }
+
+        for o in output {
+            println!("{:?}: {:?}", o.0, o.1);
+        }
     }
 
     #[test]
     fn test_minimize_2d() {
+        let mut output = Vec::new();
+
+        let f = |x: f64, y: f64| (x - 2.5).powi(2) + (y + 1.25).powi(2) + 4.0;
+
+        for ulim in [(-1.0, 1.0), (1.0, 3.0), (3.0, 10.0)].into_iter() {
+            for vlim in [(-10.0, -2.0), (-2.0, -1.0), (-1.0, 10.0)].into_iter() {
+                output.push(((ulim, vlim), minimize_2d(&f, *ulim, *vlim, 1e-6)));
+            }
+        }
+
+        for o in output {
+            println!("{:?}: {:?}", o.0, o.1);
+        }
     }
 }
