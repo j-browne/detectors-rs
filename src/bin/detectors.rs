@@ -30,7 +30,7 @@ fn main() -> Result<(), Error> {
     output.sort_by_key(|x| x.0);
 
     for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
-        println!("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
+        println!("{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
     }
     Ok(())
 }
