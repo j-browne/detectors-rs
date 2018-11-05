@@ -28,9 +28,9 @@ where
         let mut strips = Vec::with_capacity(t.strips.len());
         for s in &t.strips {
             let mut trans = Vec::with_capacity(d.trans.len() + t.trans.len() + s.trans.len());
-            trans.extend_from_slice(&d.trans);
-            trans.extend_from_slice(&t.trans);
             trans.extend_from_slice(&s.trans);
+            trans.extend_from_slice(&t.trans);
+            trans.extend_from_slice(&d.trans);
             strips.push(Detector {
                 coords: s.coords,
                 trans,
@@ -199,6 +199,7 @@ impl Detector {
 struct DetectorBuilder {
     #[serde(rename = "type")]
     detector_type: String,
+    #[serde(default)]
     #[serde(rename = "transformations")]
     trans: Vec<Transformation>,
 }
@@ -249,8 +250,6 @@ impl CoordinateSystem {
             }
         }
     }
-
-    
 }
 
 #[derive(Serialize, Deserialize, Clone)]
