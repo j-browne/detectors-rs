@@ -365,6 +365,7 @@ fn integral_2d<'a>(
     result
 }
 
+// TODO: Try multiple starting locations (ends, middle?)
 pub fn minimize_1d<'a>(
     f: &'a Fn(f64) -> f64,
     lim: (f64, f64),
@@ -384,6 +385,7 @@ pub fn minimize_1d<'a>(
     (x[0], f(x[0]))
 }
 
+// TODO: Try multiple starting locations (corners, middle of edges, center?)
 pub fn minimize_2d<'a>(
     f: &'a Fn(f64, f64) -> f64,
     u_lim: (f64, f64),
