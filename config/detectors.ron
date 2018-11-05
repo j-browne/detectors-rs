@@ -3,7 +3,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
@@ -15,7 +15,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
@@ -27,7 +27,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
@@ -39,7 +39,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
@@ -51,7 +51,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
@@ -63,7 +63,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
@@ -75,7 +75,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
@@ -87,7 +87,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
@@ -99,7 +99,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
@@ -111,7 +111,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
@@ -123,7 +123,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
@@ -135,7 +135,7 @@
   (
     type: "BB15F",
     transformations: [
-      Rotation((0,90,0)),
+      Rotation((0,-90,0)),
       Rotation((0,0,90)),
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
