@@ -365,12 +365,13 @@ fn integral_2d<'a>(
     result
 }
 
-// TODO: Try multiple starting locations (ends, middle?)
 pub fn minimize_1d<'a>(
     f: &'a Fn(f64) -> f64,
     lim: (f64, f64),
     eps: f64,
 ) -> (f64, f64) {
+    let mut candidates = Vec::new();
+
     let minimizer = NelderMeadBuilder::default()
         .adaptive(true)
         .ftol(eps)
@@ -378,20 +379,27 @@ pub fn minimize_1d<'a>(
         .unwrap();// FIXME
 
     let func = |x: ArrayView1<f64>| if x[0] < lim.0 || x[0] > lim.1 { std::f64::INFINITY } else { f(x[0]) };
-    let mid = Array::from_vec(vec![(lim.0 + lim.1) / 2.0]);
 
-    let x = minimizer.minimize(func, mid.view());
+    for u in [lim.0, (lim.0 + lim.1) / 2.0, lim.1].into_iter() {
+        let x = minimizer.minimize(func, Array::from_vec(vec![*u]).view());
 
-    (x[0], f(x[0]))
+        candidates.push(x);
+    }
+
+    candidates.sort_by(|a, b| f(a[0]).partial_cmp(&f(b[0])).unwrap().reverse()); //FIXME
+
+    let min = candidates.pop().unwrap(); // FIXME
+    (min[0], f(min[0]))
 }
 
-// TODO: Try multiple starting locations (corners, middle of edges, center?)
 pub fn minimize_2d<'a>(
     f: &'a Fn(f64, f64) -> f64,
     u_lim: (f64, f64),
     v_lim: (f64, f64),
     eps: f64,
 ) -> ((f64, f64), f64) {
+    let mut candidates = Vec::new();
+
     let minimizer = NelderMeadBuilder::default()
         .adaptive(true)
         .ftol(eps)
@@ -399,11 +407,19 @@ pub fn minimize_2d<'a>(
         .unwrap();// FIXME
 
     let func = |x: ArrayView1<f64>| if x[0] < u_lim.0 || x[0] > u_lim.1 || x[1] < v_lim.0 || x[1] > v_lim.1 { std::f64::INFINITY } else { f(x[0], x[1]) };
-    let mid = Array::from_vec(vec![(u_lim.0 + u_lim.1) / 2.0, (v_lim.0 + v_lim.1) / 2.0]);
 
-    let x = minimizer.minimize(func, mid.view());
+    for u in [u_lim.0, (u_lim.0 + u_lim.1) / 2.0, u_lim.1].into_iter() {
+        for v in [v_lim.0, (v_lim.0 + v_lim.1) / 2.0, v_lim.1].into_iter() {
+            let x = minimizer.minimize(func, Array::from_vec(vec![*u, *v]).view());
 
-    ((x[0], x[1]), f(x[0], x[1]))
+            candidates.push(x);
+        }
+    }
+
+    candidates.sort_by(|a, b| f(a[0], a[1]).partial_cmp(&f(b[0], b[1])).unwrap().reverse()); //FIXME
+
+    let min = candidates.pop().unwrap(); // FIXME
+    ((min[0], min[1]), f(min[0], min[1]))
 }
 
 pub trait Spherical {
