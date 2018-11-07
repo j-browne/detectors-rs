@@ -8,7 +8,7 @@
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,30)),
+      Rotation((0,0,-30)),
     ],
   ),
   // E2
@@ -20,7 +20,7 @@
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,60)),
+      Rotation((0,0,-60)),
     ],
   ),
   // E3
@@ -32,7 +32,7 @@
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,90)),
+      Rotation((0,0,-90)),
     ],
   ),
   // E4
@@ -44,7 +44,7 @@
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,120)),
+      Rotation((0,0,-120)),
     ],
   ),
   // E6
@@ -56,7 +56,7 @@
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,300)),
+      Rotation((0,0,-300)),
     ],
   ),
   // E7
@@ -68,7 +68,7 @@
       Translation((0,8.636,-80.2386)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,330)),
+      Rotation((0,0,-330)),
     ],
   ),
   // E8
@@ -80,7 +80,7 @@
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,30)),
+      Rotation((0,0,-30)),
     ],
   ),
   // E9
@@ -92,7 +92,7 @@
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,60)),
+      Rotation((0,0,-60)),
     ],
   ),
   // E10
@@ -104,7 +104,7 @@
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,90)),
+      Rotation((0,0,-90)),
     ],
   ),
   // E11
@@ -116,7 +116,7 @@
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,120)),
+      Rotation((0,0,-120)),
     ],
   ),
   // E13
@@ -128,7 +128,7 @@
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,300)),
+      Rotation((0,0,-300)),
     ],
   ),
   // E14
@@ -140,7 +140,7 @@
       Translation((0,30.861,-1.3462)),
       Rotation((0,0,6.03)),
       Translation((0,95.25,0)),
-      Rotation((0,0,330)),
+      Rotation((0,0,-330)),
     ],
   ),
   // E15

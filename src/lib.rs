@@ -89,33 +89,18 @@ impl Detector {
         self.coords.backward(p)
     }
 
-    pub fn th_min(&self) -> f64 {
-        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_th();
+    pub fn func_min<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
+        let f = |u, v| { let p = self.forward(Point2::new(u, v)); f(p) };
         minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
     }
 
-    pub fn th_max(&self) -> f64 {
-        let f = |u, v| -self.forward(Point2::new(u ,v)).sphere_th();
+    pub fn func_max<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
+        let f = |u, v| { let p = self.forward(Point2::new(u, v)); -f(p) };
         -minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
     }
 
-    pub fn th_avg(&self) -> f64 {
-        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_th() * self.d_solid_angle(Point2::new(u, v));
-        integral_2d(&f, self.u_lim, self.v_lim, (1e-8, 1e-5)) / self.solid_angle()
-    }
-
-    pub fn phi_min(&self) -> f64 {
-        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_phi();
-        minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
-    }
-
-    pub fn phi_max(&self) -> f64 {
-        let f = |u, v| -self.forward(Point2::new(u ,v)).sphere_phi();
-        -minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
-    }
-
-    pub fn phi_avg(&self) -> f64 {
-        let f = |u, v| self.forward(Point2::new(u ,v)).sphere_phi() * self.d_solid_angle(Point2::new(u, v));
+    pub fn func_avg<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
+        let f = |u, v| { let p2 = Point2::new(u, v); let p3 = self.forward(p2); f(p3) * self.d_solid_angle(p2) };
         integral_2d(&f, self.u_lim, self.v_lim, (1e-8, 1e-5)) / self.solid_angle()
     }
 
@@ -322,8 +307,8 @@ fn integral_2d<'a>(
     eps: (f64, f64),
 ) -> f64 {
     use rgsl::GaussKonrodRule::Gauss15;
-    let mut iw1 = IntegrationWorkspace::new(100).unwrap();
-    let mut iw2 = IntegrationWorkspace::new(100).unwrap();
+    let mut iw1 = IntegrationWorkspace::new(200).unwrap();
+    let mut iw2 = IntegrationWorkspace::new(200).unwrap();
 
     let fu: fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64 = |x, params| params.0(x, params.1);
     let fv: fn(
@@ -339,7 +324,7 @@ fn integral_2d<'a>(
             (params.2).1,
             (params.3).0,
             (params.3).1,
-            100,
+            200,
             Gauss15,
             &mut result,
             &mut error,
@@ -357,7 +342,7 @@ fn integral_2d<'a>(
         v_lim.1,
         eps.0,
         eps.1,
-        100,
+        200,
         Gauss15,
         &mut result,
         &mut error,
@@ -420,33 +405,6 @@ pub fn minimize_2d<'a>(
 
     let min = candidates.pop().unwrap(); // FIXME
     ((min[0], min[1]), f(min[0], min[1]))
-}
-
-pub trait Spherical {
-    fn sphere_r(&self) -> f64;
-    fn sphere_th(&self) -> f64;
-    fn sphere_phi(&self) -> f64;
-    fn sphere(&self) -> (f64, f64, f64);
-}
-
-impl Spherical for Point3<f64> {
-    fn sphere_r(&self) -> f64 {
-        f64::sqrt(self[0].powi(2) + self[1].powi(2) + self[2].powi(2))
-    }
-    fn sphere_th(&self) -> f64 {
-        let r = self.sphere_r();
-        f64::acos(self[2] / r).to_degrees()
-    }
-    fn sphere_phi(&self) -> f64 {
-        f64::atan2(self[0], self[1]).to_degrees()
-    }
-
-    fn sphere(&self) -> (f64, f64, f64) {
-        let r = f64::sqrt(self[0].powi(2) + self[1].powi(2) + self[2].powi(2));
-        let th = f64::acos(self[2] / r).to_degrees();
-        let phi = f64::atan2(self[0], self[1]).to_degrees();
-        (r, th, phi)
-    }
 }
 
 #[cfg(test)]
