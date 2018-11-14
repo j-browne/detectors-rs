@@ -184,16 +184,14 @@ impl Detector {
 struct DetectorBuilder {
     #[serde(rename = "type")]
     detector_type: String,
-    #[serde(default)]
-    #[serde(rename = "transformations")]
+    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
     trans: Vec<Transformation>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct DetectorType {
     strips: Vec<DetectorStrip>,
-    #[serde(default)]
-    #[serde(rename = "transformations")]
+    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
     trans: Vec<Transformation>,
 }
 
@@ -202,8 +200,7 @@ struct DetectorStrip {
     coords: CoordinateSystem,
     u_lim: (f64, f64),
     v_lim: (f64, f64),
-    #[serde(default)]
-    #[serde(rename = "transformations")]
+    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
     trans: Vec<Transformation>,
 }
 
@@ -239,11 +236,9 @@ impl CoordinateSystem {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Transformation {
-    #[serde(serialize_with = "serialize_rotation")]
-    #[serde(deserialize_with = "deserialize_rotation")]
+    #[serde(serialize_with = "serialize_rotation", deserialize_with = "deserialize_rotation")]
     Rotation(Rotation3<f64>),
-    #[serde(serialize_with = "serialize_translation")]
-    #[serde(deserialize_with = "deserialize_translation")]
+    #[serde(serialize_with = "serialize_translation",deserialize_with = "deserialize_translation")]
     Translation(Translation3<f64>),
 }
 
