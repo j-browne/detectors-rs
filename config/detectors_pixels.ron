@@ -1,0 +1,266 @@
+[
+  // E1
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,8.636,-80.2386)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-30)),
+    ],
+  ),
+  // E2
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,8.636,-80.2386)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-60)),
+    ],
+  ),
+  // E3
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,8.636,-80.2386)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-90)),
+    ],
+  ),
+  // E4
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,8.636,-80.2386)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-120)),
+    ],
+  ),
+  // E6
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,8.636,-80.2386)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-300)),
+    ],
+  ),
+  // E7
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,8.636,-80.2386)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-330)),
+    ],
+  ),
+  // E8
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-30)),
+    ],
+  ),
+  // E9
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-60)),
+    ],
+  ),
+  // E10
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-90)),
+    ],
+  ),
+  // E11
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-120)),
+    ],
+  ),
+  // E13
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-300)),
+    ],
+  ),
+  // E14
+  (
+    type: "BB15",
+    transformations: [
+      Rotation((0,-90,0)),
+      Rotation((0,0,90)),
+      Translation((0,30.861,-1.3462)),
+      Rotation((0,0,6.03)),
+      Translation((0,95.25,0)),
+      Rotation((0,0,-330)),
+    ],
+  ),
+  // E15
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-6.35)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-60)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // dE15
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-12.7)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-60)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // E16
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-6.35)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-120)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // dE16
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-12.7)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-120)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // E17
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-6.35)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-180)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // dE17
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-12.7)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-180)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // E18
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-6.35)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-240)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // dE18
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-12.7)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-240)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // E19
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-6.35)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-300)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+  // dE19
+  (
+    type: "YY1",
+    transformations: [
+      Rotation((0,0,90)),
+      Translation((0,0,-12.7)),
+      Rotation((-43,0,0)),
+      Translation((0,20.3705,106.447)),
+      Rotation((0,0,-300)),
+      Translation((0,0,151.362)),
+    ],
+  ),
+]

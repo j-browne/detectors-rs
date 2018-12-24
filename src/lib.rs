@@ -1,4 +1,4 @@
-//#![feature(custom_attribute)]
+#![feature(custom_attribute)]
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
@@ -8,6 +8,7 @@ use std::{collections::HashMap, io::Read};
 pub use crate::error::Error;
 
 pub mod error;
+pub mod surface;
 
 pub fn dets_from_readers<T, U>(
     reader_dets: T,
@@ -253,11 +254,11 @@ impl std::fmt::Debug for Transformation {
                     r[0].to_degrees(),
                     r[1].to_degrees(),
                     r[2].to_degrees()
-                );
+                )?;
             }
             Transformation::Translation(t) => {
                 let t = t.vector.data;
-                write!(f, "Translation({}, {}, {})", t[0], t[1], t[2]);
+                write!(f, "Translation({}, {}, {})", t[0], t[1], t[2])?;
             }
         }
         Ok(())
