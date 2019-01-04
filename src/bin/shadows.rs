@@ -1,7 +1,7 @@
-use detectors_rs::{Error, Detector, dets_from_readers};
+use detectors_rs::surface::Config;
 use nalgebra::Point3;
 use rayon::prelude::*;
-use std::{sync::Mutex, path::Path, fs::File, io::BufReader};
+use std::{sync::Mutex, path::PathBuf, fs::File};
 use structopt::{clap::AppSettings, StructOpt};
 
 #[derive(Debug, StructOpt)]
@@ -13,10 +13,8 @@ use structopt::{clap::AppSettings, StructOpt};
     raw(global_settings = "&[AppSettings::DisableVersion]")
 )]
 struct Opt {
-    #[structopt(short = "d", long = "detectors")]
-    det_file: String,
-    #[structopt(short = "t", long = "detector-types")]
-    types_file: String,
+    #[structopt(name = "FILE", parse(from_os_str))]
+    files: Vec<PathBuf>,
 }
 
 fn theta(p: Point3<f64>) -> f64 {
@@ -29,9 +27,14 @@ fn phi(p: Point3<f64>) -> f64 {
     phi
 }
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), Box<std::error::Error>> {
     let opt = Opt::from_args();
-    let dets = dets_from_names(opt.det_file, opt.types_file)?;
+    let mut config = Config::new();
+    for file_path in opt.files {
+        let file = File::open(file_path)?;
+        config.add_from_reader(file)?;
+    }
+    let dets = config.to_detectors();
     let output = Mutex::new(Vec::new());
     dets.par_iter().enumerate().for_each(|(i, d)| {
         d.par_iter().enumerate().for_each(|(j, s)| {
@@ -50,19 +53,4 @@ fn main() -> Result<(), Error> {
         println!("{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
     }
     Ok(())
-}
-
-fn dets_from_names<T, U>(
-    name_dets: T,
-    name_det_types: U,
-) -> Result<Vec<Vec<Detector>>, Error>
-where
-    T: AsRef<Path>,
-    U: AsRef<Path>,
-{
-    let file_dets = File::open(name_dets)?;
-    let file_dets = BufReader::new(file_dets);
-    let file_types = File::open(name_det_types)?;
-    let file_types = BufReader::new(file_types);
-    dets_from_readers(file_dets, file_types)
 }
