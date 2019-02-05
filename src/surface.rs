@@ -1,49 +1,10 @@
-use crate::{CoordinateSystem, Detector, Transformation};
-use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap,
-    io::Read,
-};
+use crate::{error::Error, CoordinateSystem, Transformation};
+use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, Debug, Default)]
-pub struct Config {
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    detectors: Vec<Surface>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    shadows: Vec<Surface>,
-    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    templates: HashMap<String, Surface>,
-}
+pub type Surface = SurfaceBase;
 
-impl Config {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn add_from_reader<R: Read>(&mut self, reader: R) -> Result<(), Box<std::error::Error>> {
-        let other: Self = ron::de::from_reader(reader)?;
-        self.append(other);
-        Ok(())
-    }
-
-    pub fn append(&mut self, mut other: Self) {
-        self.detectors.append(&mut other.detectors);
-        self.shadows.append(&mut other.shadows);
-        self.templates.extend(other.templates.drain());
-    }
-
-    pub fn apply_templates(&mut self) {
-        for _det in &mut self.detectors {
-        }
-    }
-
-    pub fn to_detectors(self) -> Vec<Vec<Detector>> {
-        Vec::new()
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct BaseSurface {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SurfaceBase {
     coords: CoordinateSystem,
     u_limits: (f64, f64),
     v_limits: (f64, f64),
@@ -51,25 +12,179 @@ pub struct BaseSurface {
     trans: Vec<Transformation>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GroupSurface {
-    surfaces: Vec<Surface>,
+impl SurfaceBase {
+    pub fn trans(&self) -> &Vec<Transformation> {
+        &self.trans
+    }
+
+    pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
+        &mut self.trans
+    }
+
+    pub fn add_trans(&mut self, t: &mut Vec<Transformation>) {
+        self.trans_mut().append(t);
+    }
+
+    pub fn simplify(&self, id: Vec<u32>) -> (Vec<u32>, Surface) {
+        (id, self.clone())
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SurfaceGroup {
+    surfaces: Vec<NotTemplate>,
     #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
     trans: Vec<Transformation>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum NonTemplateSurface {
-    Base(BaseSurface),
-    Group(GroupSurface),
+impl SurfaceGroup {
+    pub fn trans(&self) -> &Vec<Transformation> {
+        &self.trans
+    }
+
+    pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
+        &mut self.trans
+    }
+
+    pub fn add_trans(&mut self, t: &mut Vec<Transformation>) {
+        self.trans_mut().append(t);
+    }
+
+    pub fn simplify(&self, mut id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
+        id.push(0);
+        let mut simplified = Vec::new();
+        for s in &self.surfaces {
+            let mut new = s.simplify(id.clone());
+
+            for (_id, s) in new.iter_mut() {
+                s.add_trans(&mut self.trans().clone());
+            }
+
+            simplified.append(&mut new);
+            let last = id.last_mut()
+                .expect("cannot get last element of a vector (that should exist)");
+            *last += 1;
+        }
+        simplified
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum Surface {
-    Base(BaseSurface),
-    Group(GroupSurface),
-    Template {
-        name: String,
-        surface: Box<Surface>, 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SurfaceTemplate {
+    name: String,
+    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    trans: Vec<Transformation>,
+}
+
+impl SurfaceTemplate {
+    pub fn trans(&self) -> &Vec<Transformation> {
+        &self.trans
+    }
+
+    pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
+        &mut self.trans
+    }
+
+    pub fn add_trans(&mut self, t: &mut Vec<Transformation>) {
+        self.trans_mut().append(t);
+    }
+
+    pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
+        unimplemented!()
+    }
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum NotTemplate {
+    Base {
+        #[serde(flatten)]
+        surface: SurfaceBase,
     },
+    Group{
+        #[serde(flatten)]
+        surface: SurfaceGroup,
+    },
+}
+
+impl NotTemplate {
+    pub fn trans(&self) -> &Vec<Transformation> {
+        match self {
+            NotTemplate::Base {surface: s} => s.trans(),
+            NotTemplate::Group {surface: s} => s.trans(),
+        }
+    }
+
+    pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
+        match self {
+            NotTemplate::Base {surface: s} => s.trans_mut(),
+            NotTemplate::Group {surface: s} => s.trans_mut(),
+        }
+    }
+
+    pub fn add_trans(&mut self, t: &mut Vec<Transformation>) {
+        self.trans_mut().append(t);
+    }
+
+    pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
+        match self {
+            NotTemplate::Base {surface: s} => vec![s.simplify(id)],
+            NotTemplate::Group {surface: s} => s.simplify(id),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum MaybeTemplate {
+    NotTemplate {
+        #[serde(flatten)]
+        surface: NotTemplate,
+    },
+    Template {
+        #[serde(flatten)]
+        template: SurfaceTemplate,
+    },
+}
+
+impl MaybeTemplate {
+    pub fn trans(&self) -> &Vec<Transformation> {
+        match self {
+            MaybeTemplate::Template {template: t} => t.trans(),
+            MaybeTemplate::NotTemplate {surface: s} => s.trans(),
+        }
+    }
+
+    pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
+        match self {
+            MaybeTemplate::Template {template: t} => t.trans_mut(),
+            MaybeTemplate::NotTemplate {surface: s} => s.trans_mut(),
+        }
+    }
+
+    pub fn apply_templates(&mut self, templates: &HashMap<String, NotTemplate>) -> Result<(), Error>{
+        match self {
+            MaybeTemplate::Template{ template: t } => {
+                let mut temp = MaybeTemplate::NotTemplate{
+                    surface: templates
+                        .get(&t.name)
+                        .ok_or(Error::UnknownTemplate)?
+                        .clone()
+                };
+                temp.trans_mut().append(self.trans_mut());
+                *self = temp;
+            }
+            _ => {}
+        }
+
+        Ok(())
+    }
+
+    pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
+        match self {
+            MaybeTemplate::Template {template: t} => t.simplify(id),
+            MaybeTemplate::NotTemplate {surface: s} => s.simplify(id),
+        }
+    }
 }

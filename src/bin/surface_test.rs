@@ -1,13 +1,12 @@
-use detectors_rs::surface::Config;
+use detectors_rs::config::Config;
 use std::fs::File;
 use std::io::BufReader;
-use ron::{ser::{self, PrettyConfig}, de};
 
 fn main() -> Result<(), Box<std::error::Error>> {
-    let file = File::open("config/detector_types_new.ron")?;
+    let file = File::open("config/detectors.json")?;
     let file = BufReader::new(file);
-    let config: Config = de::from_reader(file)?;
-    println!("{}", ser::to_string_pretty(&config, PrettyConfig::default())?);
+    let config: Config = serde_json::from_reader(file)?;
+    println!("{:#?}", config);
 
     Ok(())
 }

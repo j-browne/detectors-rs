@@ -1,4 +1,4 @@
-use detectors_rs::surface::Config;
+use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point3;
 use rayon::prelude::*;
 use std::{sync::Mutex, path::PathBuf, fs::File};
@@ -34,6 +34,9 @@ fn main() -> Result<(), Box<std::error::Error>> {
         let file = File::open(file_path)?;
         config.add_from_reader(file)?;
     }
+    config.apply_templates()?;
+    println!("{:#?}", config.simplify());
+    /*
     let dets = config.to_detectors();
     let output = Mutex::new(Vec::new());
     dets.par_iter().enumerate().for_each(|(i, d)| {
@@ -52,5 +55,6 @@ fn main() -> Result<(), Box<std::error::Error>> {
     for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
         println!("{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
     }
+    */
     Ok(())
 }

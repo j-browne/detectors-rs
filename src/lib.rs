@@ -1,4 +1,6 @@
 #![feature(custom_attribute)]
+#[macro_use]extern crate serde_derive;
+
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
@@ -8,6 +10,7 @@ use std::{collections::HashMap, io::Read};
 pub use crate::error::Error;
 
 pub mod error;
+pub mod config;
 pub mod surface;
 
 pub fn dets_from_readers<T, U>(
@@ -18,8 +21,8 @@ where
     T: Read,
     U: Read,
 {
-    let detector_types: HashMap<String, DetectorType> = ron::de::from_reader(reader_det_types)?;
-    let detectors: Vec<DetectorBuilder> = ron::de::from_reader(reader_dets)?;
+    let detector_types: HashMap<String, DetectorType> = serde_json::from_reader(reader_det_types)?;
+    let detectors: Vec<DetectorBuilder> = serde_json::from_reader(reader_dets)?;
 
     let mut dets = Vec::with_capacity(detectors.len());
     for d in &detectors {
