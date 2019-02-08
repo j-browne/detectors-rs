@@ -27,25 +27,21 @@ fn phi(p: Point3<f64>) -> f64 {
     phi
 }
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
     let mut config = Config::new();
     for file_path in opt.files {
         let file = File::open(file_path)?;
         config.add_from_reader(file)?;
     }
-    config.apply_templates()?;
-    println!("{:#?}", config.simplify());
-    /*
-    let dets = config.to_detectors();
+
+    let (detectors, _shadows) = config.simplify()?;
     let output = Mutex::new(Vec::new());
-    dets.par_iter().enumerate().for_each(|(i, d)| {
-        d.par_iter().enumerate().for_each(|(j, s)| {
-            output.lock().unwrap().push((i + 1, j,
-                                         s.func_min(theta), s.func_max(theta), s.func_avg(theta),
-                                         s.func_min(phi), s.func_max(phi), s.func_avg(phi),
-                                         s.solid_angle()));
-        });
+    detectors.par_iter().for_each(|(id, surface)| {
+        output.lock().unwrap().push((id[0], id[1],
+            surface.func_min(theta), surface.func_max(theta), surface.func_avg(theta),
+            surface.func_min(phi), surface.func_max(phi), surface.func_avg(phi),
+            surface.solid_angle()));
     });
 
     let mut output = output.into_inner().unwrap();
@@ -55,6 +51,6 @@ fn main() -> Result<(), Box<std::error::Error>> {
     for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
         println!("{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
     }
-    */
+
     Ok(())
 }
