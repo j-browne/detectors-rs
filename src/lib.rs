@@ -1,16 +1,17 @@
 #![feature(custom_attribute)]
-#[macro_use]extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 
+pub use crate::error::Error;
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, io::Read};
-pub use crate::error::Error;
 
-pub mod error;
 pub mod config;
+pub mod error;
 pub mod surface;
 
 pub fn dets_from_readers<T, U>(
@@ -93,18 +94,37 @@ impl Detector {
         self.coords.backward(p)
     }
 
-    pub fn func_min<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
-        let f = |u, v| { let p = self.forward(Point2::new(u, v)); f(p) };
+    pub fn func_min<F>(&self, f: F) -> f64
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let f = |u, v| {
+            let p = self.forward(Point2::new(u, v));
+            f(p)
+        };
         minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
     }
 
-    pub fn func_max<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
-        let f = |u, v| { let p = self.forward(Point2::new(u, v)); -f(p) };
+    pub fn func_max<F>(&self, f: F) -> f64
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let f = |u, v| {
+            let p = self.forward(Point2::new(u, v));
+            -f(p)
+        };
         -minimize_2d(&f, self.u_lim, self.v_lim, 1e-8).1
     }
 
-    pub fn func_avg<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
-        let f = |u, v| { let p2 = Point2::new(u, v); let p3 = self.forward(p2); f(p3) * self.d_solid_angle(p2) };
+    pub fn func_avg<F>(&self, f: F) -> f64
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let f = |u, v| {
+            let p2 = Point2::new(u, v);
+            let p3 = self.forward(p2);
+            f(p3) * self.d_solid_angle(p2)
+        };
         integral_2d(&f, self.u_lim, self.v_lim, (1e-8, 1e-5)) / self.solid_angle()
     }
 
@@ -188,14 +208,22 @@ impl Detector {
 struct DetectorBuilder {
     #[serde(rename = "type")]
     detector_type: String,
-    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        rename = "transformations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     trans: Vec<Transformation>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct DetectorType {
     strips: Vec<DetectorStrip>,
-    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        rename = "transformations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     trans: Vec<Transformation>,
 }
 
@@ -204,7 +232,11 @@ struct DetectorStrip {
     coords: CoordinateSystem,
     u_lim: (f64, f64),
     v_lim: (f64, f64),
-    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        rename = "transformations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     trans: Vec<Transformation>,
 }
 
@@ -240,9 +272,15 @@ impl CoordinateSystem {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Transformation {
-    #[serde(serialize_with = "serialize_rotation", deserialize_with = "deserialize_rotation")]
+    #[serde(
+        serialize_with = "serialize_rotation",
+        deserialize_with = "deserialize_rotation"
+    )]
     Rotation(Rotation3<f64>),
-    #[serde(serialize_with = "serialize_translation",deserialize_with = "deserialize_translation")]
+    #[serde(
+        serialize_with = "serialize_translation",
+        deserialize_with = "deserialize_translation"
+    )]
     Translation(Translation3<f64>),
 }
 
@@ -312,7 +350,13 @@ fn integral_2d<'a>(
     let fu: fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64 = |x, params| params.0(x, params.1);
     let fv: fn(
         f64,
-        &mut (&'a Fn(f64, f64) -> f64, _, (f64, f64), (f64, f64), &mut IntegrationWorkspace),
+        &mut (
+            &'a Fn(f64, f64) -> f64,
+            _,
+            (f64, f64),
+            (f64, f64),
+            &mut IntegrationWorkspace,
+        ),
     ) -> f64 = |x, params| {
         let mut result = 0.0;
         let mut error = 0.0;
@@ -349,20 +393,22 @@ fn integral_2d<'a>(
     result
 }
 
-pub fn minimize_1d<'a>(
-    f: &'a Fn(f64) -> f64,
-    lim: (f64, f64),
-    eps: f64,
-) -> (f64, f64) {
+pub fn minimize_1d<'a>(f: &'a Fn(f64) -> f64, lim: (f64, f64), eps: f64) -> (f64, f64) {
     let mut candidates = Vec::new();
 
     let minimizer = NelderMeadBuilder::default()
         .adaptive(true)
         .ftol(eps)
         .build()
-        .unwrap();// FIXME
+        .unwrap(); // FIXME
 
-    let func = |x: ArrayView1<f64>| if x[0] < lim.0 || x[0] > lim.1 { std::f64::INFINITY } else { f(x[0]) };
+    let func = |x: ArrayView1<f64>| {
+        if x[0] < lim.0 || x[0] > lim.1 {
+            std::f64::INFINITY
+        } else {
+            f(x[0])
+        }
+    };
 
     for u in [lim.0, (lim.0 + lim.1) / 2.0, lim.1].into_iter() {
         let x = minimizer.minimize(func, Array::from_vec(vec![*u]).view());
@@ -388,9 +434,15 @@ pub fn minimize_2d<'a>(
         .adaptive(true)
         .ftol(eps)
         .build()
-        .unwrap();// FIXME
+        .unwrap(); // FIXME
 
-    let func = |x: ArrayView1<f64>| if x[0] < u_lim.0 || x[0] > u_lim.1 || x[1] < v_lim.0 || x[1] > v_lim.1 { std::f64::INFINITY } else { f(x[0], x[1]) };
+    let func = |x: ArrayView1<f64>| {
+        if x[0] < u_lim.0 || x[0] > u_lim.1 || x[1] < v_lim.0 || x[1] > v_lim.1 {
+            std::f64::INFINITY
+        } else {
+            f(x[0], x[1])
+        }
+    };
 
     for u in [u_lim.0, (u_lim.0 + u_lim.1) / 2.0, u_lim.1].into_iter() {
         for v in [v_lim.0, (v_lim.0 + v_lim.1) / 2.0, v_lim.1].into_iter() {

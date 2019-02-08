@@ -1,4 +1,7 @@
-use crate::{error::Error, surface::{Surface, MaybeTemplate, NotTemplate}};
+use crate::{
+    error::Error,
+    surface::{MaybeTemplate, NotTemplate, Surface},
+};
 use std::{collections::HashMap, io::Read};
 
 #[derive(Serialize, Deserialize, Debug, Default)]

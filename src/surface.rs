@@ -1,9 +1,9 @@
 use crate::{error::Error, CoordinateSystem, Transformation};
-use std::collections::HashMap;
 use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
+use std::collections::HashMap;
 
 pub type Surface = SurfaceBase;
 
@@ -12,7 +12,11 @@ pub struct SurfaceBase {
     coords: CoordinateSystem,
     u_limits: (f64, f64),
     v_limits: (f64, f64),
-    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        rename = "transformations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     trans: Vec<Transformation>,
 }
 
@@ -32,8 +36,6 @@ impl SurfaceBase {
     pub fn simplify(&self, id: Vec<u32>) -> (Vec<u32>, Surface) {
         (id, self.clone())
     }
-
-
 
     pub fn coords_forward(&self, p: Point2<f64>) -> Point3<f64> {
         let mut res = self.coords.forward(p);
@@ -56,18 +58,37 @@ impl SurfaceBase {
         self.coords.backward(p)
     }
 
-    pub fn func_min<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
-        let f = |u, v| { let p = self.coords_forward(Point2::new(u, v)); f(p) };
+    pub fn func_min<F>(&self, f: F) -> f64
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let f = |u, v| {
+            let p = self.coords_forward(Point2::new(u, v));
+            f(p)
+        };
         minimize_2d(&f, self.u_limits, self.v_limits, 1e-8).1
     }
 
-    pub fn func_max<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
-        let f = |u, v| { let p = self.coords_forward(Point2::new(u, v)); -f(p) };
+    pub fn func_max<F>(&self, f: F) -> f64
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let f = |u, v| {
+            let p = self.coords_forward(Point2::new(u, v));
+            -f(p)
+        };
         -minimize_2d(&f, self.u_limits, self.v_limits, 1e-8).1
     }
 
-    pub fn func_avg<F>(&self, f: F) -> f64 where F: Fn(Point3<f64>) -> f64 {
-        let f = |u, v| { let p2 = Point2::new(u, v); let p3 = self.coords_forward(p2); f(p3) * self.d_solid_angle(p2) };
+    pub fn func_avg<F>(&self, f: F) -> f64
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let f = |u, v| {
+            let p2 = Point2::new(u, v);
+            let p3 = self.coords_forward(p2);
+            f(p3) * self.d_solid_angle(p2)
+        };
         integral_2d(&f, self.u_limits, self.v_limits, (1e-8, 1e-5)) / self.solid_angle()
     }
 
@@ -150,7 +171,11 @@ impl SurfaceBase {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SurfaceGroup {
     surfaces: Vec<NotTemplate>,
-    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        rename = "transformations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     trans: Vec<Transformation>,
 }
 
@@ -178,7 +203,8 @@ impl SurfaceGroup {
             }
 
             simplified.append(&mut new);
-            let last = id.last_mut()
+            let last = id
+                .last_mut()
                 .expect("cannot get last element of a vector (that should exist)");
             *last += 1;
         }
@@ -189,7 +215,11 @@ impl SurfaceGroup {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SurfaceTemplate {
     name: String,
-    #[serde(default, rename = "transformations", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        rename = "transformations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     trans: Vec<Transformation>,
 }
 
@@ -207,7 +237,6 @@ impl SurfaceTemplate {
     }
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum NotTemplate {
@@ -215,7 +244,7 @@ pub enum NotTemplate {
         #[serde(flatten)]
         surface: SurfaceBase,
     },
-    Group{
+    Group {
         #[serde(flatten)]
         surface: SurfaceGroup,
     },
@@ -224,15 +253,15 @@ pub enum NotTemplate {
 impl NotTemplate {
     pub fn trans(&self) -> &Vec<Transformation> {
         match self {
-            NotTemplate::Base {surface: s} => s.trans(),
-            NotTemplate::Group {surface: s} => s.trans(),
+            NotTemplate::Base { surface: s } => s.trans(),
+            NotTemplate::Group { surface: s } => s.trans(),
         }
     }
 
     pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
         match self {
-            NotTemplate::Base {surface: s} => s.trans_mut(),
-            NotTemplate::Group {surface: s} => s.trans_mut(),
+            NotTemplate::Base { surface: s } => s.trans_mut(),
+            NotTemplate::Group { surface: s } => s.trans_mut(),
         }
     }
 
@@ -242,8 +271,8 @@ impl NotTemplate {
 
     pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
         match self {
-            NotTemplate::Base {surface: s} => vec![s.simplify(id)],
-            NotTemplate::Group {surface: s} => s.simplify(id),
+            NotTemplate::Base { surface: s } => vec![s.simplify(id)],
+            NotTemplate::Group { surface: s } => s.simplify(id),
         }
     }
 }
@@ -264,28 +293,29 @@ pub enum MaybeTemplate {
 impl MaybeTemplate {
     pub fn trans(&self) -> &Vec<Transformation> {
         match self {
-            MaybeTemplate::Template {template: t} => t.trans(),
-            MaybeTemplate::NotTemplate {surface: s} => s.trans(),
+            MaybeTemplate::Template { template: t } => t.trans(),
+            MaybeTemplate::NotTemplate { surface: s } => s.trans(),
         }
     }
 
     pub fn trans_mut(&mut self) -> &mut Vec<Transformation> {
         match self {
-            MaybeTemplate::Template {template: t} => t.trans_mut(),
-            MaybeTemplate::NotTemplate {surface: s} => s.trans_mut(),
+            MaybeTemplate::Template { template: t } => t.trans_mut(),
+            MaybeTemplate::NotTemplate { surface: s } => s.trans_mut(),
         }
     }
 
-    pub fn apply_templates(&self, templates: &HashMap<String, NotTemplate>) -> Result<NotTemplate, Error> {
+    pub fn apply_templates(
+        &self,
+        templates: &HashMap<String, NotTemplate>,
+    ) -> Result<NotTemplate, Error> {
         match self {
             MaybeTemplate::Template { template: t } => {
                 let mut temp = templates
                     .get(&t.name)
                     .ok_or(Error::UnknownTemplate)?
                     .clone();
-                temp
-                    .trans_mut()
-                    .extend(self.trans().iter().cloned());
+                temp.trans_mut().extend(self.trans().iter().cloned());
                 Ok(temp)
             }
             MaybeTemplate::NotTemplate { surface: s } => Ok(s.clone()),
@@ -306,7 +336,13 @@ fn integral_2d<'a>(
     let fu: fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64 = |x, params| params.0(x, params.1);
     let fv: fn(
         f64,
-        &mut (&'a Fn(f64, f64) -> f64, _, (f64, f64), (f64, f64), &mut IntegrationWorkspace),
+        &mut (
+            &'a Fn(f64, f64) -> f64,
+            _,
+            (f64, f64),
+            (f64, f64),
+            &mut IntegrationWorkspace,
+        ),
     ) -> f64 = |x, params| {
         let mut result = 0.0;
         let mut error = 0.0;
@@ -343,20 +379,22 @@ fn integral_2d<'a>(
     result
 }
 
-pub fn minimize_1d<'a>(
-    f: &'a Fn(f64) -> f64,
-    limits: (f64, f64),
-    eps: f64,
-) -> (f64, f64) {
+pub fn minimize_1d<'a>(f: &'a Fn(f64) -> f64, limits: (f64, f64), eps: f64) -> (f64, f64) {
     let mut candidates = Vec::new();
 
     let minimizer = NelderMeadBuilder::default()
         .adaptive(true)
         .ftol(eps)
         .build()
-        .unwrap();// FIXME
+        .unwrap(); // FIXME
 
-    let func = |x: ArrayView1<f64>| if x[0] < limits.0 || x[0] > limits.1 { std::f64::INFINITY } else { f(x[0]) };
+    let func = |x: ArrayView1<f64>| {
+        if x[0] < limits.0 || x[0] > limits.1 {
+            std::f64::INFINITY
+        } else {
+            f(x[0])
+        }
+    };
 
     for u in [limits.0, (limits.0 + limits.1) / 2.0, limits.1].into_iter() {
         let x = minimizer.minimize(func, Array::from_vec(vec![*u]).view());
@@ -382,9 +420,15 @@ pub fn minimize_2d<'a>(
         .adaptive(true)
         .ftol(eps)
         .build()
-        .unwrap();// FIXME
+        .unwrap(); // FIXME
 
-    let func = |x: ArrayView1<f64>| if x[0] < u_limits.0 || x[0] > u_limits.1 || x[1] < v_limits.0 || x[1] > v_limits.1 { std::f64::INFINITY } else { f(x[0], x[1]) };
+    let func = |x: ArrayView1<f64>| {
+        if x[0] < u_limits.0 || x[0] > u_limits.1 || x[1] < v_limits.0 || x[1] > v_limits.1 {
+            std::f64::INFINITY
+        } else {
+            f(x[0], x[1])
+        }
+    };
 
     for u in [u_limits.0, (u_limits.0 + u_limits.1) / 2.0, u_limits.1].into_iter() {
         for v in [v_limits.0, (v_limits.0 + v_limits.1) / 2.0, v_limits.1].into_iter() {

@@ -1,11 +1,17 @@
-use detectors_rs::{Error, Detector, dets_from_readers};
+use detectors_rs::{dets_from_readers, Detector, Error};
 use nalgebra::Point3;
 use rayon::prelude::*;
-use std::{sync::Mutex, path::Path, fs::File, io::BufReader};
+use std::{fs::File, io::BufReader, path::Path, sync::Mutex};
 use structopt::{clap::AppSettings, StructOpt};
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "detectors", about = "A program to calculate detector properties.", version="", author = "", raw(global_settings = "&[AppSettings::DisableVersion]"))]
+#[structopt(
+    name = "detectors",
+    about = "A program to calculate detector properties.",
+    version = "",
+    author = "",
+    raw(global_settings = "&[AppSettings::DisableVersion]")
+)]
 struct Opt {
     #[structopt(short = "d", long = "detectors")]
     det_file: String,
@@ -19,7 +25,9 @@ fn theta(p: Point3<f64>) -> f64 {
 
 fn phi(p: Point3<f64>) -> f64 {
     let mut phi = f64::atan2(p[0], p[1]).to_degrees();
-    if phi < 0.0 { phi += 360.0 };
+    if phi < 0.0 {
+        phi += 360.0
+    };
     phi
 }
 
@@ -29,10 +37,17 @@ fn main() -> Result<(), Error> {
     let output = Mutex::new(Vec::new());
     dets.par_iter().enumerate().for_each(|(i, d)| {
         d.par_iter().enumerate().for_each(|(j, s)| {
-            output.lock().unwrap().push((i + 1, j,
-                                         s.func_min(theta), s.func_max(theta), s.func_avg(theta),
-                                         s.func_min(phi), s.func_max(phi), s.func_avg(phi),
-                                         s.solid_angle()));
+            output.lock().unwrap().push((
+                i + 1,
+                j,
+                s.func_min(theta),
+                s.func_max(theta),
+                s.func_avg(theta),
+                s.func_min(phi),
+                s.func_max(phi),
+                s.func_avg(phi),
+                s.solid_angle(),
+            ));
         });
     });
 
@@ -41,15 +56,15 @@ fn main() -> Result<(), Error> {
     output.sort_by_key(|x| x.0);
 
     for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
-        println!("{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}", det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle);
+        println!(
+            "{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}",
+            det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle
+        );
     }
     Ok(())
 }
 
-fn dets_from_names<T, U>(
-    name_dets: T,
-    name_det_types: U,
-) -> Result<Vec<Vec<Detector>>, Error>
+fn dets_from_names<T, U>(name_dets: T, name_det_types: U) -> Result<Vec<Vec<Detector>>, Error>
 where
     T: AsRef<Path>,
     U: AsRef<Path>,
