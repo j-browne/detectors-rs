@@ -88,10 +88,6 @@ impl SurfaceTemplate {
     pub fn add_trans(&mut self, t: &mut Vec<Transformation>) {
         self.trans_mut().append(t);
     }
-
-    pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
-        unimplemented!()
-    }
 }
 
 
@@ -163,28 +159,19 @@ impl MaybeTemplate {
         }
     }
 
-    pub fn apply_templates(&mut self, templates: &HashMap<String, NotTemplate>) -> Result<(), Error>{
+    pub fn apply_templates(&self, templates: &HashMap<String, NotTemplate>) -> Result<NotTemplate, Error> {
         match self {
-            MaybeTemplate::Template{ template: t } => {
-                let mut temp = MaybeTemplate::NotTemplate{
-                    surface: templates
-                        .get(&t.name)
-                        .ok_or(Error::UnknownTemplate)?
-                        .clone()
-                };
-                temp.trans_mut().append(self.trans_mut());
-                *self = temp;
+            MaybeTemplate::Template { template: t } => {
+                let mut temp = templates
+                    .get(&t.name)
+                    .ok_or(Error::UnknownTemplate)?
+                    .clone();
+                temp
+                    .trans_mut()
+                    .extend(self.trans().iter().cloned());
+                Ok(temp)
             }
-            _ => {}
-        }
-
-        Ok(())
-    }
-
-    pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
-        match self {
-            MaybeTemplate::Template {template: t} => t.simplify(id),
-            MaybeTemplate::NotTemplate {surface: s} => s.simplify(id),
+            MaybeTemplate::NotTemplate { surface: s } => Ok(s.clone()),
         }
     }
 }

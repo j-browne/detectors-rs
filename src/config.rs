@@ -28,23 +28,37 @@ impl Config {
         self.templates.extend(other.templates.drain());
     }
 
-    pub fn apply_templates(&mut self) -> Result<(), Error> {
-        for s in self.detectors.iter_mut().chain(self.shadows.iter_mut()) {
-            s.apply_templates(&self.templates)?;
-        }
-
-        Ok(())
-    }
-
-    pub fn simplify(self) -> Vec<(Vec<u32>, Surface)> {
-        let mut v = Vec::new();
-        let mut id = 0;
+    pub fn apply_templates(&self) -> Result<(Vec<NotTemplate>, Vec<NotTemplate>), Error> {
+        let mut detectors = Vec::new();
+        let mut shadows = Vec::new();
 
         for s in self.detectors.iter() {
-            v.append(&mut s.simplify(vec![id]));
+            detectors.push(s.apply_templates(&self.templates)?);
+        }
+
+        for s in self.shadows.iter() {
+            shadows.push(s.apply_templates(&self.templates)?);
+        }
+
+        Ok((detectors, shadows))
+    }
+
+    pub fn simplify(self) -> Result<(Vec<(Vec<u32>, Surface)>, Vec<(Vec<u32>, Surface)>), Error> {
+        let mut simplified_detectors = Vec::new();
+        let mut id = 0;
+        let (detectors, shadows) = self.apply_templates()?;
+        for s in detectors {
+            simplified_detectors.append(&mut s.simplify(vec![id]));
             id += 1;
         }
 
-        v
+        let mut simplified_shadows = Vec::new();
+        let mut id = 0;
+        for s in shadows {
+            simplified_shadows.append(&mut s.simplify(vec![id]));
+            id += 1;
+        }
+
+        Ok((simplified_detectors, simplified_shadows))
     }
 }
