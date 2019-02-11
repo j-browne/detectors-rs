@@ -1,7 +1,7 @@
-use detectors_rs::{dets_from_readers, Detector, Error};
+use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point3;
 use rayon::prelude::*;
-use std::{fs::File, io::BufReader, path::Path, sync::Mutex};
+use std::{fs::File, path::PathBuf, sync::Mutex};
 use structopt::{clap::AppSettings, StructOpt};
 
 #[derive(Debug, StructOpt)]
@@ -13,10 +13,8 @@ use structopt::{clap::AppSettings, StructOpt};
     raw(global_settings = "&[AppSettings::DisableVersion]")
 )]
 struct Opt {
-    #[structopt(short = "d", long = "detectors")]
-    det_file: String,
-    #[structopt(short = "t", long = "detector-types")]
-    types_file: String,
+    #[structopt(name = "FILE", parse(from_os_str))]
+    files: Vec<PathBuf>,
 }
 
 fn theta(p: Point3<f64>) -> f64 {
@@ -33,22 +31,26 @@ fn phi(p: Point3<f64>) -> f64 {
 
 fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
-    let dets = dets_from_names(opt.det_file, opt.types_file)?;
+    let mut config = Config::new();
+    for file_path in opt.files {
+        let file = File::open(file_path)?;
+        config.add_from_reader(file)?;
+    }
+
+    let (detectors, _shadows) = config.simplify()?;
     let output = Mutex::new(Vec::new());
-    dets.par_iter().enumerate().for_each(|(i, d)| {
-        d.par_iter().enumerate().for_each(|(j, s)| {
-            output.lock().unwrap().push((
-                i + 1,
-                j,
-                s.func_min(theta),
-                s.func_max(theta),
-                s.func_avg(theta),
-                s.func_min(phi),
-                s.func_max(phi),
-                s.func_avg(phi),
-                s.solid_angle(),
-            ));
-        });
+    detectors.par_iter().for_each(|(id, surface)| {
+        output.lock().unwrap().push((
+            id[0],
+            id[1],
+            surface.func_min(theta),
+            surface.func_max(theta),
+            surface.func_avg(theta),
+            surface.func_min(phi),
+            surface.func_max(phi),
+            surface.func_avg(phi),
+            surface.solid_angle(),
+        ));
     });
 
     let mut output = output.into_inner().unwrap();
@@ -58,20 +60,9 @@ fn main() -> Result<(), Error> {
     for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
         println!(
             "{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}",
-            det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle
+            det+1, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle
         );
     }
-    Ok(())
-}
 
-fn dets_from_names<T, U>(name_dets: T, name_det_types: U) -> Result<Vec<Vec<Detector>>, Error>
-where
-    T: AsRef<Path>,
-    U: AsRef<Path>,
-{
-    let file_dets = File::open(name_dets)?;
-    let file_dets = BufReader::new(file_dets);
-    let file_types = File::open(name_det_types)?;
-    let file_types = BufReader::new(file_types);
-    dets_from_readers(file_dets, file_types)
+    Ok(())
 }

@@ -166,6 +166,27 @@ impl SurfaceBase {
         let f = |u, v| self.d_solid_angle(Point2::new(u, v));
         integral_2d(&f, self.u_limits, self.v_limits, (1e-8, 1e-5))
     }
+
+    pub fn solid_angle_with_shadows(&self, shadows: &[Surface]) -> f64 {
+        let f = |u, v| {
+            let mut blocked = false;
+            for s in shadows {
+                /*
+                if s.contains(u, v) {
+                    blocked = true;
+                    break;
+                }
+                */
+            }
+
+            if blocked {
+                0.0
+            } else {
+                self.d_solid_angle(Point2::new(u, v))
+            }
+        };
+        integral_2d(&f, self.u_limits, self.v_limits, (1e-8, 1e-5))
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

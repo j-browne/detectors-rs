@@ -1,0 +1,246 @@
+{
+  "detectors": [
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,8.636,-80.2386]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-30.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,8.636,-80.2386]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-60.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,8.636,-80.2386]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-90.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,8.636,-80.2386]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-120.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,8.636,-80.2386]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-300.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,8.636,-80.2386]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-330.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,30.861,-1.3462]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-30.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,30.861,-1.3462]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-60.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,30.861,-1.3462]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-90.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,30.861,-1.3462]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-120.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,30.861,-1.3462]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-300.0]}
+      ]
+    },
+    {
+      "name": "BB15F",
+      "transformations": [
+        {"Rotation": [0.0,-90.0,0.0]},
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,30.861,-1.3462]},
+        {"Rotation": [0.0,0.0,6.03]},
+        {"Translation": [0.0,95.25,0.0]},
+        {"Rotation": [0.0,0.0,-330.0]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-6.35]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-60.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-12.7]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-60.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-6.35]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-120.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-12.7]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-120.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-6.35]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-180.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-12.7]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-180.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-6.35]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-240.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-12.7]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-240.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-6.35]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-300.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    },
+    {
+      "name": "YY1F",
+      "transformations": [
+        {"Rotation": [0.0,0.0,90.0]},
+        {"Translation": [0.0,0.0,-12.7]},
+        {"Rotation": [-43,0.0,0.0]},
+        {"Translation": [0.0,20.3705,106.447]},
+        {"Rotation": [0.0,0.0,-300.0]},
+        {"Translation": [0.0,0.0,151.362]}
+      ]
+    }
+  ]
+}
