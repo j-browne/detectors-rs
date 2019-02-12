@@ -37,8 +37,8 @@ impl SurfaceBase {
         (id, self.clone())
     }
 
-    pub fn coords_forward(&self, p: Point2<f64>) -> Point3<f64> {
-        let mut res = self.coords.forward(p);
+    pub fn coords_local_to_world(&self, p: Point2<f64>) -> Point3<f64> {
+        let mut res = self.coords.local_to_world(p);
         for t in &self.trans {
             res = match t {
                 Transformation::Rotation(t) => t * res,
@@ -48,14 +48,33 @@ impl SurfaceBase {
         res
     }
 
-    pub fn coords_backward(&self, mut p: Point3<f64>) -> Point3<f64> {
+    pub fn coords_world_to_local(&self, mut p: Point3<f64>) -> Point3<f64> {
         for t in self.trans.iter().rev() {
             p = match t {
                 Transformation::Rotation(t) => t.inverse() * p,
                 Transformation::Translation(t) => t.inverse() * p,
             };
         }
-        self.coords.backward(p)
+        self.coords.world_to_local(p)
+    }
+
+    // TODO: If the two z values are the same you can get inf.
+    pub fn intersects(&self, p_src_world: Point3<f64>, p_dest_world: Point3<f64>) -> bool {
+        let p1 = self.coords_world_to_local(p_dest_world);
+        let p2 = self.coords_world_to_local(p_src_world);
+
+        let int = Point2::new(
+            -(p1.x - p2.x) / (p1.z - p2.z) * p1.z + p1.x,
+            -(p1.y - p2.y) / (p1.z - p2.z) * p1.z + p1.y,
+        );
+
+        // Make sure the point is within u and v limits
+        //  AND the surface is between src and dest
+        int.x >= self.u_limits.0
+            && int.x <= self.u_limits.1
+            && int.y >= self.v_limits.0
+            && int.y <= self.v_limits.1
+            && p1.z.signum() * p2.z.signum() == -1.0
     }
 
     pub fn func_min<F>(&self, f: F) -> f64
@@ -63,7 +82,7 @@ impl SurfaceBase {
         F: Fn(Point3<f64>) -> f64,
     {
         let f = |u, v| {
-            let p = self.coords_forward(Point2::new(u, v));
+            let p = self.coords_local_to_world(Point2::new(u, v));
             f(p)
         };
         minimize_2d(&f, self.u_limits, self.v_limits, 1e-8).1
@@ -74,7 +93,7 @@ impl SurfaceBase {
         F: Fn(Point3<f64>) -> f64,
     {
         let f = |u, v| {
-            let p = self.coords_forward(Point2::new(u, v));
+            let p = self.coords_local_to_world(Point2::new(u, v));
             -f(p)
         };
         -minimize_2d(&f, self.u_limits, self.v_limits, 1e-8).1
@@ -86,7 +105,7 @@ impl SurfaceBase {
     {
         let f = |u, v| {
             let p2 = Point2::new(u, v);
-            let p3 = self.coords_forward(p2);
+            let p3 = self.coords_local_to_world(p2);
             f(p3) * self.d_solid_angle(p2)
         };
         integral_2d(&f, self.u_limits, self.v_limits, (1e-8, 1e-5)) / self.solid_angle()
@@ -94,7 +113,7 @@ impl SurfaceBase {
 
     pub fn d_solid_angle(&self, p: Point2<f64>) -> f64 {
         let fu: fn(f64, &mut (f64, &Self, usize)) -> f64 =
-            |x, params| Self::coords_forward(params.1, Point2::new(x, params.0))[params.2];
+            |x, params| Self::coords_local_to_world(params.1, Point2::new(x, params.0))[params.2];
         let mut dr_du = Vector3::new(0.0, 0.0, 0.0);
         let mut dr_du_err = Vector3::new(0.0, 0.0, 0.0);
         deriv_central(
@@ -123,7 +142,7 @@ impl SurfaceBase {
         );
 
         let fv: fn(f64, &mut (f64, &Self, usize)) -> f64 =
-            |x, params| Self::coords_forward(params.1, Point2::new(params.0, x))[params.2];
+            |x, params| Self::coords_local_to_world(params.1, Point2::new(params.0, x))[params.2];
         let mut dr_dv = Vector3::new(0.0, 0.0, 0.0);
         let mut dr_dv_err = Vector3::new(0.0, 0.0, 0.0);
         deriv_central(
@@ -154,7 +173,7 @@ impl SurfaceBase {
         // Surface area
         // dS = dr/du x dr/dv
         let ds = dr_du.cross(&dr_dv);
-        let r = self.coords_forward(p).coords;
+        let r = self.coords_local_to_world(p).coords;
 
         // Solid angle
         // dΩ = r.dS / |r|^3
@@ -170,19 +189,20 @@ impl SurfaceBase {
     pub fn solid_angle_with_shadows(&self, shadows: &[Surface]) -> f64 {
         let f = |u, v| {
             let mut blocked = false;
+            let p_local = Point2::new(u, v);
+            let p_world = self.coords_local_to_world(p_local);
             for s in shadows {
-                /*
-                if s.contains(u, v) {
+                // TODO: Check that the shadow is between the source and the detector
+                if s.intersects(Point3::origin(), p_world) {
                     blocked = true;
                     break;
                 }
-                */
             }
 
             if blocked {
                 0.0
             } else {
-                self.d_solid_angle(Point2::new(u, v))
+                self.d_solid_angle(p_local)
             }
         };
         integral_2d(&f, self.u_limits, self.v_limits, (1e-8, 1e-5))

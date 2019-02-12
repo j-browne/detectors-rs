@@ -1,4 +1,4 @@
-use detectors_rs::{config::Config, error::Error};
+use detectors_rs::{config::Config, error::Error, surface::Surface};
 use nalgebra::Point3;
 use rayon::prelude::*;
 use std::{fs::File, path::PathBuf, sync::Mutex};
@@ -37,7 +37,8 @@ fn main() -> Result<(), Error> {
         config.add_from_reader(file)?;
     }
 
-    let (detectors, _shadows) = config.simplify()?;
+    let (detectors, shadows) = config.simplify()?;
+    let shadows: Vec<Surface> = shadows.into_iter().map(|x| x.1).collect();
     let output = Mutex::new(Vec::new());
     detectors.par_iter().for_each(|(id, surface)| {
         output.lock().unwrap().push((
@@ -49,7 +50,7 @@ fn main() -> Result<(), Error> {
             surface.func_min(phi),
             surface.func_max(phi),
             surface.func_avg(phi),
-            surface.solid_angle(),
+            surface.solid_angle_with_shadows(&shadows),
         ));
     });
 
@@ -60,7 +61,15 @@ fn main() -> Result<(), Error> {
     for (det, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle) in output {
         println!(
             "{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}",
-            det+1, chan, th_min, th_max, th_avg, phi_min, phi_max, phi_avg, solid_angle
+            det + 1,
+            chan,
+            th_min,
+            th_max,
+            th_avg,
+            phi_min,
+            phi_max,
+            phi_avg,
+            solid_angle
         );
     }
 
