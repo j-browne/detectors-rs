@@ -14,6 +14,8 @@ pub struct Config {
     templates: HashMap<String, NotTemplate>,
 }
 
+type D = (Vec<u32>, Surface);
+type S = (Vec<u32>, Surface);
 impl Config {
     pub fn new() -> Self {
         Self::default()
@@ -46,20 +48,16 @@ impl Config {
         Ok((detectors, shadows))
     }
 
-    pub fn simplify(self) -> Result<(Vec<(Vec<u32>, Surface)>, Vec<(Vec<u32>, Surface)>), Error> {
+    pub fn simplify(self) -> Result<(Vec<D>, Vec<S>), Error> {
         let mut simplified_detectors = Vec::new();
-        let mut id = 0;
         let (detectors, shadows) = self.apply_templates()?;
-        for s in detectors {
-            simplified_detectors.append(&mut s.simplify(vec![id]));
-            id += 1;
+        for (id, s) in detectors.iter().enumerate() {
+            simplified_detectors.append(&mut s.simplify(vec![id as u32]));
         }
 
         let mut simplified_shadows = Vec::new();
-        let mut id = 0;
-        for s in shadows {
-            simplified_shadows.append(&mut s.simplify(vec![id]));
-            id += 1;
+        for (id, s) in shadows.iter().enumerate() {
+            simplified_shadows.append(&mut s.simplify(vec![id as u32]));
         }
 
         Ok((simplified_detectors, simplified_shadows))

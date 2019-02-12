@@ -17,7 +17,7 @@ pub enum CoordinateSystem {
 }
 
 impl CoordinateSystem {
-    pub fn local_to_world(&self, p: Point2<f64>) -> Point3<f64> {
+    pub fn local_to_world(self, p: Point2<f64>) -> Point3<f64> {
         match self {
             CoordinateSystem::CartesianZ => Point3::new(p[0], p[1], 0.0),
             CoordinateSystem::PolarZ => Point3::new(
@@ -28,7 +28,7 @@ impl CoordinateSystem {
         }
     }
 
-    pub fn world_to_local(&self, p: Point3<f64>) -> Point3<f64> {
+    pub fn world_to_local(self, p: Point3<f64>) -> Point3<f64> {
         match self {
             CoordinateSystem::CartesianZ => p,
             CoordinateSystem::PolarZ => {

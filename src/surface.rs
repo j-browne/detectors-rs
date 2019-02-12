@@ -74,7 +74,7 @@ impl SurfaceBase {
             && int.x <= self.u_limits.1
             && int.y >= self.v_limits.0
             && int.y <= self.v_limits.1
-            && p1.z.signum() * p2.z.signum() == -1.0
+            && (p1.z.signum() * p2.z.signum() - -1.0).abs() < std::f64::EPSILON
     }
 
     pub fn func_min<F>(&self, f: F) -> f64
@@ -364,8 +364,8 @@ impl MaybeTemplate {
     }
 }
 
-fn integral_2d<'a>(
-    f: &'a Fn(f64, f64) -> f64,
+fn integral_2d(
+    f: &Fn(f64, f64) -> f64,
     u_limits: (f64, f64),
     v_limits: (f64, f64),
     eps: (f64, f64),
@@ -374,17 +374,21 @@ fn integral_2d<'a>(
     let mut iw1 = IntegrationWorkspace::new(200).unwrap();
     let mut iw2 = IntegrationWorkspace::new(200).unwrap();
 
-    let fu: fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64 = |x, params| params.0(x, params.1);
-    let fv: fn(
+    type F1<'a> = fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64;
+    type F2<'a> = fn(
         f64,
         &mut (
             &'a Fn(f64, f64) -> f64,
-            _,
+            for<'r> fn(f64, &'r mut (&'a (dyn std::ops::Fn(f64, f64) -> f64 + 'a), f64)) -> f64,
             (f64, f64),
             (f64, f64),
             &mut IntegrationWorkspace,
         ),
-    ) -> f64 = |x, params| {
+    ) -> f64;
+    //let fu: fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64 = |x, params| params.0(x, params.1);
+    let fu: F1 = |x, params| params.0(x, params.1);
+    //let fv: fn(f64, &mut (&'a Fn(f64, f64) -> f64, _, (f64, f64), (f64, f64), &mut IntegrationWorkspace)) -> f64 = |x, params| {
+    let fv: F2 = |x, params| {
         let mut result = 0.0;
         let mut error = 0.0;
         params.4.qag(
@@ -420,7 +424,7 @@ fn integral_2d<'a>(
     result
 }
 
-pub fn minimize_1d<'a>(f: &'a Fn(f64) -> f64, limits: (f64, f64), eps: f64) -> (f64, f64) {
+pub fn minimize_1d(f: &Fn(f64) -> f64, limits: (f64, f64), eps: f64) -> (f64, f64) {
     let mut candidates = Vec::new();
 
     let minimizer = NelderMeadBuilder::default()
@@ -437,7 +441,7 @@ pub fn minimize_1d<'a>(f: &'a Fn(f64) -> f64, limits: (f64, f64), eps: f64) -> (
         }
     };
 
-    for u in [limits.0, (limits.0 + limits.1) / 2.0, limits.1].into_iter() {
+    for u in [limits.0, (limits.0 + limits.1) / 2.0, limits.1].iter() {
         let x = minimizer.minimize(func, Array::from_vec(vec![*u]).view());
 
         candidates.push(x);
@@ -449,8 +453,8 @@ pub fn minimize_1d<'a>(f: &'a Fn(f64) -> f64, limits: (f64, f64), eps: f64) -> (
     (min[0], f(min[0]))
 }
 
-pub fn minimize_2d<'a>(
-    f: &'a Fn(f64, f64) -> f64,
+pub fn minimize_2d(
+    f: &Fn(f64, f64) -> f64,
     u_limits: (f64, f64),
     v_limits: (f64, f64),
     eps: f64,
@@ -471,8 +475,8 @@ pub fn minimize_2d<'a>(
         }
     };
 
-    for u in [u_limits.0, (u_limits.0 + u_limits.1) / 2.0, u_limits.1].into_iter() {
-        for v in [v_limits.0, (v_limits.0 + v_limits.1) / 2.0, v_limits.1].into_iter() {
+    for u in [u_limits.0, (u_limits.0 + u_limits.1) / 2.0, u_limits.1].iter() {
+        for v in [v_limits.0, (v_limits.0 + v_limits.1) / 2.0, v_limits.1].iter() {
             let x = minimizer.minimize(func, Array::from_vec(vec![*u, *v]).view());
 
             candidates.push(x);
