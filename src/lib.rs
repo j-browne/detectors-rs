@@ -7,8 +7,12 @@ use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use serde::{Deserialize, Serialize};
 
 pub mod config;
+pub(crate) mod detector;
 pub mod error;
-pub mod surface;
+pub(crate) mod surface;
+
+pub use crate::detector::Detector;
+pub use crate::surface::Surface;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum CoordinateSystem {

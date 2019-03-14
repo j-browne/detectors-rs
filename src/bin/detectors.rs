@@ -1,4 +1,4 @@
-use detectors_rs::{config::Config, error::Error, surface::Surface};
+use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point3;
 use rayon::prelude::*;
 use std::{fs::File, path::PathBuf, sync::Mutex};
@@ -37,8 +37,8 @@ fn main() -> Result<(), Error> {
         config.add_from_reader(file)?;
     }
 
-    let (detectors, shadows) = config.simplify()?;
-    let shadows: Vec<Surface> = shadows.into_iter().map(|x| x.1).collect();
+    let detectors = config.simplify()?;
+
     let output = Mutex::new(Vec::new());
     detectors.par_iter().for_each(|(id, surface)| {
         output.lock().unwrap().push((
@@ -50,7 +50,7 @@ fn main() -> Result<(), Error> {
             surface.func_min(phi),
             surface.func_max(phi),
             surface.func_avg(phi),
-            surface.solid_angle_with_shadows(&shadows),
+            surface.solid_angle_with_shadows(),
         ));
     });
 
