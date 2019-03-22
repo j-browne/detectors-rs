@@ -62,8 +62,12 @@ pub struct Simplified {
 
 impl Simplified {
     fn rand(&self) -> Self {
-        //FIXME
-        self.clone()
+        let mut other = self.clone();
+        other.surface.randomize();
+        for s in &mut other.shadows {
+            s.randomize();
+        }
+        other
     }
 
     pub fn func_min<F>(&self, f: &F) -> f64
@@ -74,8 +78,8 @@ impl Simplified {
             let p = self.surface.coords_local_to_world(Point2::new(u, v));
             f(p)
         };
-        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
-        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
+        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
         minimize_2d(&f, u_limits, v_limits, 1e-8).1
     }
 
@@ -87,8 +91,8 @@ impl Simplified {
             let p = self.surface.coords_local_to_world(Point2::new(u, v));
             -f(p)
         };
-        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
-        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
+        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
         -minimize_2d(&f, u_limits, v_limits, 1e-8).1
     }
 
@@ -101,8 +105,8 @@ impl Simplified {
             let p3 = self.surface.coords_local_to_world(p2);
             f(p3) * self.d_solid_angle(p2)
         };
-        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
-        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
+        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
         integral_2d(
             &f,
             u_limits,
@@ -185,8 +189,8 @@ impl Simplified {
 
     pub fn solid_angle(&self) -> f64 {
         let f = |u, v| self.d_solid_angle(Point2::new(u, v));
-        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
-        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
+        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
         integral_2d(&f, u_limits, v_limits, (1e-8, 1e-5))
     }
 
@@ -209,8 +213,8 @@ impl Simplified {
                 self.d_solid_angle(p_local)
             }
         };
-        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
-        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
+        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
         integral_2d(&f, u_limits, v_limits, (1e-8, 1e-5))
     }
 

@@ -1,7 +1,8 @@
-use crate::{error::Error, CoordinateSystem, Transformation};
+use crate::{error::Error, coordinates::{CoordinateSystem, Transformation}};
 use nalgebra::{Point2, Point3};
 use std::collections::HashMap;
 use val_unc::ValUnc;
+use rand::thread_rng;
 
 pub type Surface = Base;
 
@@ -36,11 +37,11 @@ impl Base {
     }
 
     pub fn u_limits_val(&self) -> (f64, f64) {
-        (self.u_limits.0.val(), self.u_limits.1.val())
+        (self.u_limits.0.val, self.u_limits.1.val)
     }
 
     pub fn v_limits_val(&self) -> (f64, f64) {
-        (self.v_limits.0.val(), self.v_limits.1.val())
+        (self.v_limits.0.val, self.v_limits.1.val)
     }
 
     pub fn trans(&self) -> &Vec<Transformation> {
@@ -55,6 +56,17 @@ impl Base {
         self.trans_mut().append(t);
     }
 
+    pub fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        let rng = &mut rng;
+        self.u_limits = (self.u_limits.0.rand(rng), self.u_limits.1.rand(rng));
+        self.v_limits = (self.v_limits.0.rand(rng), self.v_limits.1.rand(rng));
+
+        for t in &mut self.trans {
+            t.randomize(rng);
+        }
+    }
+
     /// Converts a `Base` to a `Surface` with an id.
     ///
     /// This just clones `self` and adds the id because `Surface`
@@ -66,20 +78,14 @@ impl Base {
     pub fn coords_local_to_world(&self, p: Point2<f64>) -> Point3<f64> {
         let mut res = self.coords.local_to_world(p);
         for t in &self.trans {
-            res = match t {
-                Transformation::Rotation(t) => t * res,
-                Transformation::Translation(t) => t * res,
-            };
+            res = t * res;
         }
         res
     }
 
     pub fn coords_world_to_local(&self, mut p: Point3<f64>) -> Point3<f64> {
         for t in self.trans.iter().rev() {
-            p = match t {
-                Transformation::Rotation(t) => t.inverse() * p,
-                Transformation::Translation(t) => t.inverse() * p,
-            };
+            p = t.inverse() * p;
         }
         self.coords.world_to_local(p)
     }
