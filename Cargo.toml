@@ -1,6 +1,6 @@
 [package]
 name = "detectors-rs"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["brownie"]
 edition = "2018"
 
@@ -15,4 +15,4 @@ serde = "*"
 structopt = "*"
 serde_json = "*"
 serde_derive = "*"
-val_unc = { path = "../val_unc" }
+val_unc = { git = "https://github.com/j-browne/val_unc" }
