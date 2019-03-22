@@ -6,7 +6,8 @@ use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::repeat_with};
+use val_unc::ValUnc;
 
 pub type Detector = Simplified;
 
@@ -60,7 +61,12 @@ pub struct Simplified {
 }
 
 impl Simplified {
-    pub fn func_min<F>(&self, f: F) -> f64
+    fn rand(&self) -> Self {
+        //FIXME
+        self.clone()
+    }
+
+    pub fn func_min<F>(&self, f: &F) -> f64
     where
         F: Fn(Point3<f64>) -> f64,
     {
@@ -68,10 +74,12 @@ impl Simplified {
             let p = self.surface.coords_local_to_world(Point2::new(u, v));
             f(p)
         };
-        minimize_2d(&f, self.surface.u_limits(), self.surface.v_limits(), 1e-8).1
+        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
+        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        minimize_2d(&f, u_limits, v_limits, 1e-8).1
     }
 
-    pub fn func_max<F>(&self, f: F) -> f64
+    pub fn func_max<F>(&self, f: &F) -> f64
     where
         F: Fn(Point3<f64>) -> f64,
     {
@@ -79,10 +87,12 @@ impl Simplified {
             let p = self.surface.coords_local_to_world(Point2::new(u, v));
             -f(p)
         };
-        -minimize_2d(&f, self.surface.u_limits(), self.surface.v_limits(), 1e-8).1
+        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
+        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        -minimize_2d(&f, u_limits, v_limits, 1e-8).1
     }
 
-    pub fn func_avg<F>(&self, f: F) -> f64
+    pub fn func_avg<F>(&self, f: &F) -> f64
     where
         F: Fn(Point3<f64>) -> f64,
     {
@@ -91,10 +101,12 @@ impl Simplified {
             let p3 = self.surface.coords_local_to_world(p2);
             f(p3) * self.d_solid_angle(p2)
         };
+        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
+        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
         integral_2d(
             &f,
-            self.surface.u_limits(),
-            self.surface.v_limits(),
+            u_limits,
+            v_limits,
             (1e-8, 1e-5),
         ) / self.solid_angle()
     }
@@ -173,12 +185,9 @@ impl Simplified {
 
     pub fn solid_angle(&self) -> f64 {
         let f = |u, v| self.d_solid_angle(Point2::new(u, v));
-        integral_2d(
-            &f,
-            self.surface.u_limits(),
-            self.surface.v_limits(),
-            (1e-8, 1e-5),
-        )
+        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
+        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        integral_2d(&f, u_limits, v_limits, (1e-8, 1e-5))
     }
 
     pub fn solid_angle_with_shadows(&self) -> f64 {
@@ -200,13 +209,50 @@ impl Simplified {
                 self.d_solid_angle(p_local)
             }
         };
-        integral_2d(
-            &f,
-            self.surface.u_limits(),
-            self.surface.v_limits(),
-            (1e-8, 1e-5),
-        )
+        let u_limits = (self.surface.u_limits().0.val(), self.surface.u_limits().1.val());
+        let v_limits = (self.surface.v_limits().0.val(), self.surface.v_limits().1.val());
+        integral_2d(&f, u_limits, v_limits, (1e-8, 1e-5))
     }
+
+    pub fn func_min_unc<F>(&self, f: &F, steps: usize) -> ValUnc
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let vals = repeat_with(|| self.rand().func_min(f)).take(steps).collect::<Vec<_>>();
+        statistics(&vals)
+    }
+
+    pub fn func_max_unc<F>(&self, f: &F, steps: usize) -> ValUnc
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let vals = repeat_with(|| self.rand().func_max(f)).take(steps).collect::<Vec<_>>();
+        statistics(&vals)
+    }
+
+    pub fn func_avg_unc<F>(&self, f: &F, steps: usize) -> ValUnc
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        let vals = repeat_with(|| self.rand().func_avg(f)).take(steps).collect::<Vec<_>>();
+        statistics(&vals)
+    }
+
+    pub fn solid_angle_unc(&self, steps: usize) -> ValUnc {
+        let vals = repeat_with(|| self.rand().solid_angle()).take(steps).collect::<Vec<_>>();
+        statistics(&vals)
+    }
+
+    pub fn solid_angle_with_shadows_unc(&self, steps: usize) -> ValUnc {
+        let vals = repeat_with(|| self.rand().solid_angle_with_shadows()).take(steps).collect::<Vec<_>>();
+        statistics(&vals)
+    }
+}
+
+fn statistics(vals: &[f64]) -> ValUnc {
+    let mean = vals.iter().sum::<f64>() / (vals.len() as f64);
+    let std_dev = (vals.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>() / ((vals.len() - 1) as f64)).sqrt();
+    ValUnc { val: mean, unc: std_dev }
 }
 
 fn integral_2d(

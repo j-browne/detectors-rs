@@ -1,14 +1,15 @@
 use crate::{error::Error, CoordinateSystem, Transformation};
 use nalgebra::{Point2, Point3};
 use std::collections::HashMap;
+use val_unc::ValUnc;
 
 pub type Surface = Base;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Base {
     coords: CoordinateSystem,
-    u_limits: (f64, f64),
-    v_limits: (f64, f64),
+    u_limits: (ValUnc, ValUnc),
+    v_limits: (ValUnc, ValUnc),
     #[serde(
         default,
         rename = "transformations",
@@ -18,20 +19,28 @@ pub struct Base {
 }
 
 impl Base {
-    pub fn u_limits(&self) -> (f64, f64) {
+    pub fn u_limits(&self) -> (ValUnc, ValUnc) {
         self.u_limits
     }
 
-    pub fn u_limits_mut(&mut self) -> &mut (f64, f64) {
+    pub fn u_limits_mut(&mut self) -> &mut (ValUnc, ValUnc) {
         &mut self.u_limits
     }
 
-    pub fn v_limits(&self) -> (f64, f64) {
+    pub fn v_limits(&self) -> (ValUnc, ValUnc) {
         self.v_limits
     }
 
-    pub fn v_limits_mut(&mut self) -> &mut (f64, f64) {
+    pub fn v_limits_mut(&mut self) -> &mut (ValUnc, ValUnc) {
         &mut self.v_limits
+    }
+
+    pub fn u_limits_val(&self) -> (f64, f64) {
+        (self.u_limits.0.val(), self.u_limits.1.val())
+    }
+
+    pub fn v_limits_val(&self) -> (f64, f64) {
+        (self.v_limits.0.val(), self.v_limits.1.val())
     }
 
     pub fn trans(&self) -> &Vec<Transformation> {
@@ -87,10 +96,12 @@ impl Base {
 
         // Make sure the point is within u and v limits
         //  AND the surface is between src and dest
-        int.x >= self.u_limits.0
-            && int.x <= self.u_limits.1
-            && int.y >= self.v_limits.0
-            && int.y <= self.v_limits.1
+        let u_limits = self.u_limits_val();
+        let v_limits = self.v_limits_val();
+        int.x >= u_limits.0
+            && int.x <= u_limits.1
+            && int.y >= v_limits.0
+            && int.y <= v_limits.1
             && (p1.z.signum() * p2.z.signum() - -1.0).abs() < std::f64::EPSILON
     }
 }
