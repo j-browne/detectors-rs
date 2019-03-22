@@ -3,15 +3,14 @@
 extern crate serde_derive;
 
 pub mod config;
+pub mod coordinates;
 pub(crate) mod detector;
 pub mod error;
 pub(crate) mod surface;
-pub mod coordinates;
 
 pub use crate::detector::Detector;
-pub use crate::surface::Surface;
 pub use crate::error::Error;
-
+pub use crate::surface::Surface;
 
 #[cfg(test)]
 mod tests {

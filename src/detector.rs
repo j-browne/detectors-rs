@@ -107,12 +107,7 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(
-            &f,
-            u_limits,
-            v_limits,
-            (1e-8, 1e-5),
-        ) / self.solid_angle()
+        integral_2d(&f, u_limits, v_limits, (1e-6, 1e-3)) / self.solid_angle()
     }
 
     pub fn d_solid_angle(&self, p: Point2<f64>) -> f64 {
@@ -191,7 +186,7 @@ impl Simplified {
         let f = |u, v| self.d_solid_angle(Point2::new(u, v));
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e-8, 1e-5))
+        integral_2d(&f, u_limits, v_limits, (1e-6, 1e-3))
     }
 
     pub fn solid_angle_with_shadows(&self) -> f64 {
@@ -215,14 +210,16 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e-8, 1e-5))
+        integral_2d(&f, u_limits, v_limits, (1e-6, 1e-3))
     }
 
     pub fn func_min_unc<F>(&self, f: &F, steps: usize) -> ValUnc
     where
         F: Fn(Point3<f64>) -> f64,
     {
-        let vals = repeat_with(|| self.rand().func_min(f)).take(steps).collect::<Vec<_>>();
+        let vals = repeat_with(|| self.rand().func_min(f))
+            .take(steps)
+            .collect::<Vec<_>>();
         statistics(&vals)
     }
 
@@ -230,7 +227,9 @@ impl Simplified {
     where
         F: Fn(Point3<f64>) -> f64,
     {
-        let vals = repeat_with(|| self.rand().func_max(f)).take(steps).collect::<Vec<_>>();
+        let vals = repeat_with(|| self.rand().func_max(f))
+            .take(steps)
+            .collect::<Vec<_>>();
         statistics(&vals)
     }
 
@@ -238,25 +237,36 @@ impl Simplified {
     where
         F: Fn(Point3<f64>) -> f64,
     {
-        let vals = repeat_with(|| self.rand().func_avg(f)).take(steps).collect::<Vec<_>>();
+        let vals = repeat_with(|| self.rand().func_avg(f))
+            .take(steps)
+            .collect::<Vec<_>>();
         statistics(&vals)
     }
 
     pub fn solid_angle_unc(&self, steps: usize) -> ValUnc {
-        let vals = repeat_with(|| self.rand().solid_angle()).take(steps).collect::<Vec<_>>();
+        let vals = repeat_with(|| self.rand().solid_angle())
+            .take(steps)
+            .collect::<Vec<_>>();
         statistics(&vals)
     }
 
     pub fn solid_angle_with_shadows_unc(&self, steps: usize) -> ValUnc {
-        let vals = repeat_with(|| self.rand().solid_angle_with_shadows()).take(steps).collect::<Vec<_>>();
+        let vals = repeat_with(|| self.rand().solid_angle_with_shadows())
+            .take(steps)
+            .collect::<Vec<_>>();
         statistics(&vals)
     }
 }
 
 fn statistics(vals: &[f64]) -> ValUnc {
     let mean = vals.iter().sum::<f64>() / (vals.len() as f64);
-    let std_dev = (vals.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>() / ((vals.len() - 1) as f64)).sqrt();
-    ValUnc { val: mean, unc: std_dev }
+    let std_dev = (vals.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>()
+        / ((vals.len() - 1) as f64))
+        .sqrt();
+    ValUnc {
+        val: mean,
+        unc: std_dev,
+    }
 }
 
 fn integral_2d(
@@ -302,6 +312,7 @@ fn integral_2d(
     let mut result = 0.0;
     let mut error = 0.0;
     let mut params = (f, fu, u_limits, eps, &mut iw2);
+
     iw1.qag(
         fv,
         &mut params,
@@ -316,37 +327,6 @@ fn integral_2d(
     );
     result
 }
-
-/*
-fn minimize_1d(f: &Fn(f64) -> f64, limits: (f64, f64), eps: f64) -> (f64, f64) {
-    let mut candidates = Vec::new();
-
-    let minimizer = NelderMeadBuilder::default()
-        .adaptive(true)
-        .ftol(eps)
-        .build()
-        .unwrap(); // FIXME
-
-    let func = |x: ArrayView1<f64>| {
-        if x[0] < limits.0 || x[0] > limits.1 {
-            std::f64::INFINITY
-        } else {
-            f(x[0])
-        }
-    };
-
-    for u in [limits.0, (limits.0 + limits.1) / 2.0, limits.1].iter() {
-        let x = minimizer.minimize(func, Array::from_vec(vec![*u]).view());
-
-        candidates.push(x);
-    }
-
-    candidates.sort_by(|a, b| f(a[0]).partial_cmp(&f(b[0])).unwrap().reverse()); //FIXME
-
-    let min = candidates.pop().unwrap(); // FIXME
-    (min[0], f(min[0]))
-}
-*/
 
 fn minimize_2d(
     f: &Fn(f64, f64) -> f64,

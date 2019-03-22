@@ -98,7 +98,7 @@ fn main() -> Result<(), Error> {
     let output = Mutex::new(Vec::new());
     if let Some(steps) = opt.monte_carlo {
         detectors.par_iter().for_each(|(id, surface)| {
-            output.lock().unwrap().push(OutputData{
+            output.lock().unwrap().push(OutputData {
                 det_no: id[0],
                 det_ch: id[1],
                 theta_min: surface.func_min_unc(&theta, steps),
@@ -112,7 +112,7 @@ fn main() -> Result<(), Error> {
         });
     } else {
         detectors.par_iter().for_each(|(id, surface)| {
-            output.lock().unwrap().push(OutputData{
+            output.lock().unwrap().push(OutputData {
                 det_no: id[0],
                 det_ch: id[1],
                 theta_min: surface.func_min(&theta).into(),

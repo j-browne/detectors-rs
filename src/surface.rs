@@ -1,8 +1,11 @@
-use crate::{error::Error, coordinates::{CoordinateSystem, Transformation}};
+use crate::{
+    coordinates::{CoordinateSystem, Transformation},
+    error::Error,
+};
 use nalgebra::{Point2, Point3};
+use rand::thread_rng;
 use std::collections::HashMap;
 use val_unc::ValUnc;
-use rand::thread_rng;
 
 pub type Surface = Base;
 

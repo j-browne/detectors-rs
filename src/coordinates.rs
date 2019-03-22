@@ -1,7 +1,7 @@
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use rand::Rng;
-use val_unc::ValUnc;
 use std::ops::Mul;
+use val_unc::ValUnc;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum CoordinateSystem {
@@ -44,16 +44,8 @@ pub enum Transformation {
 impl Transformation {
     pub fn randomize<R: Rng>(&mut self, rng: &mut R) {
         *self = match self {
-            Rotation(r) => Rotation((
-                r.0.rand(rng),
-                r.1.rand(rng),
-                r.2.rand(rng)
-            )),
-            Translation(t) => Translation((
-                t.0.rand(rng),
-                t.1.rand(rng),
-                t.2.rand(rng)
-            )),
+            Rotation(r) => Rotation((r.0.rand(rng), r.1.rand(rng), r.2.rand(rng))),
+            Translation(t) => Translation((t.0.rand(rng), t.1.rand(rng), t.2.rand(rng))),
         };
     }
 
@@ -68,11 +60,13 @@ impl Mul<Point3<f64>> for &Transformation {
     fn mul(self, rhs: Point3<f64>) -> Self::Output {
         match self {
             Rotation(r) => {
-                Rotation3::<f64>::new(Vector3::<f64>::new(r.0.val, r.1.val, r.2.val)) * rhs
+                Rotation3::<f64>::new(Vector3::<f64>::new(
+                    r.0.val.to_radians(),
+                    r.1.val.to_radians(),
+                    r.2.val.to_radians(),
+                )) * rhs
             }
-            Translation(t) => {
-                Translation3::<f64>::new(t.0.val, t.1.val, t.2.val) * rhs
-            }
+            Translation(t) => Translation3::<f64>::new(t.0.val, t.1.val, t.2.val) * rhs,
         }
     }
 }
@@ -85,7 +79,13 @@ impl<'a> Mul<Point3<f64>> for InverseTransformation<'a> {
     fn mul(self, rhs: Point3<f64>) -> Self::Output {
         match self {
             InverseTransformation(Rotation(r)) => {
-                Rotation3::<f64>::new(Vector3::<f64>::new(r.0.val, r.1.val, r.2.val)).inverse() * rhs
+                Rotation3::<f64>::new(Vector3::<f64>::new(
+                    r.0.val.to_radians(),
+                    r.1.val.to_radians(),
+                    r.2.val.to_radians(),
+                ))
+                .inverse()
+                    * rhs
             }
             InverseTransformation(Translation(t)) => {
                 Translation3::<f64>::new(t.0.val, t.1.val, t.2.val).inverse() * rhs
