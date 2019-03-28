@@ -21,7 +21,7 @@ pub(crate) struct Raw {
 
 impl Raw {
     pub fn simplify(
-        &self,
+        self,
         templates: &HashMap<String, NotTemplate>,
         id: Vec<u32>,
     ) -> Result<Vec<(Vec<u32>, Simplified)>, Error> {
