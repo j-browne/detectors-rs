@@ -33,7 +33,7 @@ impl CoordinateSystem {
     }
 }
 
-use Transformation::*;
+use self::Transformation::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Transformation {
