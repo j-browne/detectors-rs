@@ -167,6 +167,7 @@ impl Group {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub(crate) struct Template {
+    #[serde(rename = "template")]
     name: String,
     #[serde(
         default,
