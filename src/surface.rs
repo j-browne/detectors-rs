@@ -268,7 +268,7 @@ impl MaybeTemplate {
 
     pub fn apply_templates(
         &self,
-        templates: &HashMap<String, NotTemplate>,
+        templates: &HashMap<String, MaybeTemplate>,
     ) -> Result<NotTemplate, Error> {
         match self {
             MaybeTemplate::Template { template: t } => {
@@ -277,7 +277,7 @@ impl MaybeTemplate {
                     .ok_or(Error::UnknownTemplate)?
                     .clone();
                 temp.trans_mut().extend(self.trans().iter().cloned());
-                Ok(temp)
+                Ok(temp.apply_templates(templates)?)
             }
             MaybeTemplate::NotTemplate { surface: s } => Ok(s.clone()),
         }

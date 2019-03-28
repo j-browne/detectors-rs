@@ -1,7 +1,7 @@
 use crate::{
     detector::{Detector, Raw as DetectorRaw},
     error::Error,
-    surface::NotTemplate,
+    surface::MaybeTemplate,
 };
 use std::{collections::HashMap, io::Read};
 
@@ -10,7 +10,7 @@ pub struct Config {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     detectors: Vec<DetectorRaw>,
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    templates: HashMap<String, NotTemplate>,
+    templates: HashMap<String, MaybeTemplate>,
 }
 
 impl Config {

@@ -1,6 +1,6 @@
 use crate::{
     error::Error,
-    surface::{MaybeTemplate, NotTemplate, Surface},
+    surface::{MaybeTemplate, Surface},
 };
 use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};
@@ -22,7 +22,7 @@ pub(crate) struct Raw {
 impl Raw {
     pub fn simplify(
         self,
-        templates: &HashMap<String, NotTemplate>,
+        templates: &HashMap<String, MaybeTemplate>,
         id: Vec<u32>,
     ) -> Result<Vec<(Vec<u32>, Simplified)>, Error> {
         let Raw { surface, shadows } = self;
