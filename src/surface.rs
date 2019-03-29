@@ -74,7 +74,7 @@ impl Base {
     ///
     /// This just clones `self` and adds the id because `Surface`
     /// is just an alias of `Base`.
-    pub fn simplify(&self, id: Vec<u32>) -> (Vec<u32>, Surface) {
+    pub fn simplify(self, id: Vec<u32>) -> (Vec<u32>, Surface) {
         (id, self.clone())
     }
 
@@ -145,14 +145,15 @@ impl Group {
     /// This iterates through the `NotTemplate` elements in `surfaces`, and
     /// calls `simplify` on each element. It then adds `self`'s transformations
     /// and shadows to the simplified surface's transformations and shadows.
-    pub fn simplify(&self, mut id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
+    pub fn simplify(self, mut id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
         id.push(0);
         let mut simplified = Vec::new();
-        for s in &self.surfaces {
+        let Self { surfaces, trans } = self;
+        for s in surfaces {
             let mut new = s.simplify(id.clone());
 
             for (_id, s) in new.iter_mut() {
-                s.add_trans(&mut self.trans().clone());
+                s.add_trans(&mut trans.clone());
             }
 
             simplified.append(&mut new);
@@ -230,7 +231,7 @@ impl NotTemplate {
     ///
     /// This calls the appropriate `simplify` function, depending on which
     /// variant `self` is.
-    pub fn simplify(&self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
+    pub fn simplify(self, id: Vec<u32>) -> Vec<(Vec<u32>, Surface)> {
         match self {
             NotTemplate::Base { surface: s } => vec![s.simplify(id)],
             NotTemplate::Group { surface: s } => s.simplify(id),
