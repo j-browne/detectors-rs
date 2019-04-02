@@ -1,7 +1,8 @@
 use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point3;
+use pbr::ProgressBar;
 use rayon::prelude::*;
-use std::{fs::File, path::PathBuf, sync::Mutex};
+use std::{fs::File, io::stderr, path::PathBuf, sync::Mutex};
 use structopt::{clap::AppSettings, StructOpt};
 use val_unc::ValUnc;
 
@@ -91,9 +92,8 @@ fn main() -> Result<(), Error> {
         config.add_from_reader(file)?;
     }
 
-    //println!("{:#?}", config);
     let detectors = config.simplify()?;
-    //println!("{:#?}", detectors);
+    let pb = Mutex::new(ProgressBar::on(stderr(), detectors.len() as u64));
 
     let output = Mutex::new(Vec::new());
     if let Some(steps) = opt.monte_carlo {
@@ -109,6 +109,7 @@ fn main() -> Result<(), Error> {
                 phi_avg: surface.func_avg_unc(&phi, steps),
                 solid_angle: surface.solid_angle_with_shadows_unc(steps),
             });
+            pb.lock().unwrap().inc();
         });
     } else {
         detectors.par_iter().for_each(|(id, surface)| {
@@ -123,6 +124,7 @@ fn main() -> Result<(), Error> {
                 phi_avg: surface.func_avg(&phi).into(),
                 solid_angle: surface.solid_angle_with_shadows().into(),
             });
+            pb.lock().unwrap().inc();
         });
     }
 
