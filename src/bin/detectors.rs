@@ -94,6 +94,7 @@ fn main() -> Result<(), Error> {
 
     let detectors = config.simplify()?;
     let pb = Mutex::new(ProgressBar::on(stderr(), detectors.len() as u64));
+    pb.lock().unwrap().set(0);
 
     let output = Mutex::new(Vec::new());
     if let Some(steps) = opt.monte_carlo {
