@@ -7,7 +7,7 @@ use rand::thread_rng;
 use std::collections::HashMap;
 use val_unc::ValUnc;
 
-pub type Surface = Base;
+pub use self::Base as Surface;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Base {

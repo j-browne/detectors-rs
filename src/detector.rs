@@ -9,7 +9,7 @@ use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
 use std::{collections::HashMap, iter::repeat_with};
 use val_unc::ValUnc;
 
-pub type Detector = Simplified;
+pub use self::Simplified as Detector;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub(crate) struct Raw {
@@ -362,4 +362,26 @@ fn minimize_2d(
 
     let min = candidates.pop().unwrap(); // FIXME
     ((min[0], min[1]), f(min[0], min[1]))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_minimize_2d() {
+        let mut output = Vec::new();
+
+        let f = |x: f64, y: f64| (x - 2.5).powi(2) + (y + 1.25).powi(2) + 4.0;
+
+        for ulim in [(-1.0, 1.0), (1.0, 3.0), (3.0, 10.0)].into_iter() {
+            for vlim in [(-10.0, -2.0), (-2.0, -1.0), (-1.0, 10.0)].into_iter() {
+                output.push(((ulim, vlim), minimize_2d(&f, *ulim, *vlim, 1e-6)));
+            }
+        }
+
+        for o in output {
+            println!("{:?}: {:?}", o.0, o.1);
+        }
+    }
 }
