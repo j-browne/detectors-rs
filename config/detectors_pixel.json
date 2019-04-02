@@ -1,0 +1,178 @@
+{
+  "templates": {
+    "SORR_UP": {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [[0, 0.127], [8.636, 0.127], [-80.2386, 0.127]]},
+        {"Rotation": [0, 0, [6.03, 1]]},
+        {"Translation": [[0, 0.127], [95.25, 0.127], 0]}
+      ]
+    },
+    "SORR_DN": {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [[0, 0.127], [30.861, 0.127], [-1.3462, 0.127]]},
+        {"Rotation": [0, 0, [6.03, 1]]},
+        {"Translation": [[0, 0.127], [95.25, 0.127], [0, 0.127]]}
+      ]
+    },
+    "SIDAR_E": {
+      "template": "YY1",
+      "transformations": [
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [0, 0, [-6.35, 0.127]]},
+        {"Rotation": [-43, 0,0 ]},
+        {"Translation": [[0, 0.254], [20.3705, 0.254], [106.447, 0.254]]},
+        {"Translation": [[0, 0.127], [0, 0.127], [151.362, 0.254]]}
+      ]
+    },
+    "SIDAR_dE": {
+      "template": "YY1",
+      "transformations": [
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [0, 0, [-12.7, 0.127]]},
+        {"Rotation": [[-43, 1], 0, 0]},
+        {"Translation": [[0, 0.254], [20.3705, 0.254], [106.447, 0.254]]},
+        {"Translation": [[0, 0.127], [0, 0.127], [151.362, 0.254]]}
+      ]
+    }
+  },
+  "detectors": [
+    {
+      "template": "SORR_UP",
+      "transformations": [
+        {"Rotation": [0, 0, [-30, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_UP",
+      "transformations": [
+        {"Rotation": [0, 0, [-60, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_UP",
+      "transformations": [
+        {"Rotation": [0, 0, [-90, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_UP",
+      "transformations": [
+        {"Rotation": [0, 0, [-120, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_UP",
+      "transformations": [
+        {"Rotation": [0, 0, [-300, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_UP",
+      "transformations": [
+        {"Rotation": [0, 0, [-330, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_DN",
+      "transformations": [
+        {"Rotation": [0, 0, [-30, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_DN",
+      "transformations": [
+        {"Rotation": [0, 0, [-60, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_DN",
+      "transformations": [
+        {"Rotation": [0, 0, [-90, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_DN",
+      "transformations": [
+        {"Rotation": [0, 0, [-120, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_DN",
+      "transformations": [
+        {"Rotation": [0, 0, [-300, 1]]}
+      ]
+    },
+    {
+      "template": "SORR_DN",
+      "transformations": [
+        {"Rotation": [0, 0, [-330, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_E",
+      "transformations": [
+        {"Rotation": [0, 0, [-60, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_dE",
+      "transformations": [
+        {"Rotation": [0, 0, [-60, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_E",
+      "transformations": [
+        {"Rotation": [0, 0, [-120, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_dE",
+      "transformations": [
+        {"Rotation": [0, 0, [-120, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_E",
+      "transformations": [
+        {"Rotation": [0, 0, [-180, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_dE",
+      "transformations": [
+        {"Rotation": [0, 0, [-180, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_E",
+      "transformations": [
+        {"Rotation": [0, 0, [-240, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_dE",
+      "transformations": [
+        {"Rotation": [0, 0, [-240, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_E",
+      "transformations": [
+        {"Rotation": [0, 0, [-300, 1]]}
+      ]
+    },
+    {
+      "template": "SIDAR_dE",
+      "transformations": [
+        {"Rotation": [0, 0, [-300, 1]]}
+      ]
+    }
+  ]
+}
