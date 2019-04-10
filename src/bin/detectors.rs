@@ -34,8 +34,7 @@ fn phi(p: Point3<f64>) -> f64 {
 }
 
 struct OutputData {
-    det_no: u32,
-    det_ch: u32,
+    det_id: Vec<u32>,
     theta_min: ValUnc,
     theta_max: ValUnc,
     theta_avg: ValUnc,
@@ -48,9 +47,10 @@ struct OutputData {
 impl OutputData {
     fn format(&self) -> String {
         format!(
-            "{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}",
-            self.det_no + 1,
-            self.det_ch,
+            "{}\t{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}",
+            self.det_id.get(0).unwrap_or(&0) + 1,
+            self.det_id.get(1).unwrap_or(&0),
+            self.det_id.get(2).unwrap_or(&0),
             self.theta_min.val,
             self.theta_max.val,
             self.theta_avg.val,
@@ -63,9 +63,10 @@ impl OutputData {
 
     fn format_unc(&self) -> String {
         format!(
-            "{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}\t{}",
-            self.det_no + 1,
-            self.det_ch,
+            "{}\t{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}\t{}",
+            self.det_id.get(0).unwrap_or(&0) + 1,
+            self.det_id.get(1).unwrap_or(&0),
+            self.det_id.get(2).unwrap_or(&0),
             self.theta_min.val,
             self.theta_min.unc,
             self.theta_max.val,
@@ -96,12 +97,11 @@ fn main() -> Result<(), Error> {
     let pb = Mutex::new(ProgressBar::on(stderr(), detectors.len() as u64));
     pb.lock().unwrap().set(0);
 
-    let output = Mutex::new(Vec::new());
-    if let Some(steps) = opt.monte_carlo {
-        detectors.par_iter().for_each(|(id, surface)| {
-            output.lock().unwrap().push(OutputData {
-                det_no: id[0],
-                det_ch: id[1],
+    let mut output = if let Some(steps) = opt.monte_carlo {
+        detectors
+            .par_iter()
+            .map(|(id, surface)| OutputData {
+                det_id: id.to_vec(),
                 theta_min: surface.func_min_unc(&theta, steps),
                 theta_max: surface.func_max_unc(&theta, steps),
                 theta_avg: surface.func_avg_unc(&theta, steps),
@@ -109,14 +109,16 @@ fn main() -> Result<(), Error> {
                 phi_max: surface.func_max_unc(&phi, steps),
                 phi_avg: surface.func_avg_unc(&phi, steps),
                 solid_angle: surface.solid_angle_with_shadows_unc(steps),
-            });
-            pb.lock().unwrap().inc();
-        });
+            })
+            .inspect(|_| {
+                let _ = pb.lock().unwrap().inc();
+            })
+            .collect::<Vec<_>>()
     } else {
-        detectors.par_iter().for_each(|(id, surface)| {
-            output.lock().unwrap().push(OutputData {
-                det_no: id[0],
-                det_ch: id[1],
+        detectors
+            .par_iter()
+            .map(|(id, surface)| OutputData {
+                det_id: id.to_vec(),
                 theta_min: surface.func_min(&theta).into(),
                 theta_max: surface.func_max(&theta).into(),
                 theta_avg: surface.func_avg(&theta).into(),
@@ -124,14 +126,18 @@ fn main() -> Result<(), Error> {
                 phi_max: surface.func_max(&phi).into(),
                 phi_avg: surface.func_avg(&phi).into(),
                 solid_angle: surface.solid_angle_with_shadows().into(),
-            });
-            pb.lock().unwrap().inc();
-        });
-    }
+            })
+            .inspect(|_| {
+                let _ = pb.lock().unwrap().inc();
+            })
+            .collect::<Vec<_>>()
+    };
+    pb.into_inner().unwrap().finish();
+    println!();
 
-    let mut output = output.into_inner().unwrap();
-    output.sort_by_key(|x| x.det_ch);
-    output.sort_by_key(|x| x.det_no);
+    output.sort_by_key(|x| x.det_id.get(2).copied().unwrap_or(0));
+    output.sort_by_key(|x| x.det_id.get(1).copied().unwrap_or(0));
+    output.sort_by_key(|x| x.det_id.get(0).copied().unwrap_or(0));
 
     if opt.monte_carlo.is_some() {
         for o in output {

@@ -5,9 +5,7 @@
         {
           "coords": "CartesianZ",
           "u_limits": [0.0, 75.0],
-          "v_limits": [-20.0, 20.0],
-          "transformations": [
-          ]
+          "v_limits": [-20.0, 20.0]
         }
       ]
     },
