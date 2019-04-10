@@ -6,7 +6,7 @@ use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
-use std::{collections::HashMap, iter::repeat_with};
+use std::{cell::RefCell, collections::HashMap, iter::repeat_with, sync::Arc};
 use val_unc::ValUnc;
 
 pub use self::Simplified as Detector;
@@ -45,6 +45,7 @@ impl Raw {
                 Simplified {
                     surface: d,
                     shadows: shadows.clone(),
+                    solid_angle: Default::default(),
                 },
             )
         });
@@ -52,12 +53,14 @@ impl Raw {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Simplified {
     #[serde(flatten)]
     surface: Surface,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     shadows: Vec<Surface>,
+    #[serde(skip)]
+    solid_angle: RefCell<Arc<Option<f64>>>,
 }
 
 impl Simplified {
@@ -80,7 +83,7 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        minimize_2d(&f, u_limits, v_limits, 1e-8).1
+        minimize_2d(&f, u_limits, v_limits, 1e-8).1 // FIXME: Allow configuration of error limits
     }
 
     pub fn func_max<F>(&self, f: &F) -> f64
@@ -93,7 +96,7 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        -minimize_2d(&f, u_limits, v_limits, 1e-8).1
+        -minimize_2d(&f, u_limits, v_limits, 1e-8).1 // FIXME: Allow configuration of error limits
     }
 
     pub fn func_avg<F>(&self, f: &F) -> f64
@@ -101,13 +104,26 @@ impl Simplified {
         F: Fn(Point3<f64>) -> f64,
     {
         let f = |u, v| {
-            let p2 = Point2::new(u, v);
-            let p3 = self.surface.coords_local_to_world(p2);
-            f(p3) * self.d_solid_angle(p2)
+            let mut blocked = false;
+            let p_local = Point2::new(u, v);
+            let p_world = self.surface.coords_local_to_world(p_local);
+            for s in &self.shadows {
+                // TODO: Check that the shadow is between the source and the detector
+                if s.intersects(Point3::origin(), p_world) {
+                    blocked = true;
+                    break;
+                }
+            }
+
+            if blocked {
+                0.0
+            } else {
+                f(p_world) * self.d_solid_angle(p_local)
+            }
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e-6, 1e-3)) / self.solid_angle()
+        integral_2d(&f, u_limits, v_limits, (1e0, 1e-3)) / self.solid_angle() // FIXME: Allow configuration of error limits
     }
 
     pub fn d_solid_angle(&self, p: Point2<f64>) -> f64 {
@@ -120,7 +136,7 @@ impl Simplified {
             fu,
             &mut (p[1], &self.surface, 0),
             0.0,
-            1e-8,
+            1e-8, // FIXME: Allow configuration of error limits
             &mut dr_du[0],
             &mut dr_du_err[0],
         );
@@ -128,7 +144,7 @@ impl Simplified {
             fu,
             &mut (p[1], &self.surface, 1),
             0.0,
-            1e-8,
+            1e-8, // FIXME: Allow configuration of error limits
             &mut dr_du[1],
             &mut dr_du_err[1],
         );
@@ -136,7 +152,7 @@ impl Simplified {
             fu,
             &mut (p[1], &self.surface, 2),
             0.0,
-            1e-8,
+            1e-8, // FIXME: Allow configuration of error limits
             &mut dr_du[2],
             &mut dr_du_err[2],
         );
@@ -150,7 +166,7 @@ impl Simplified {
             fv,
             &mut (p[0], &self.surface, 0),
             0.0,
-            1e-8,
+            1e-8, // FIXME: Allow configuration of error limits
             &mut dr_dv[0],
             &mut dr_dv_err[0],
         );
@@ -158,7 +174,7 @@ impl Simplified {
             fv,
             &mut (p[0], &self.surface, 1),
             0.0,
-            1e-8,
+            1e-8, // FIXME: Allow configuration of error limits
             &mut dr_dv[1],
             &mut dr_dv_err[1],
         );
@@ -166,7 +182,7 @@ impl Simplified {
             fv,
             &mut (p[0], &self.surface, 2),
             0.0,
-            1e-8,
+            1e-8, // FIXME: Allow configuration of error limits
             &mut dr_dv[2],
             &mut dr_dv_err[2],
         );
@@ -183,13 +199,17 @@ impl Simplified {
     }
 
     pub fn solid_angle(&self) -> f64 {
-        let f = |u, v| self.d_solid_angle(Point2::new(u, v));
-        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
-        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e-6, 1e-3))
+        if self.solid_angle.borrow().is_none() {
+            let _ = self
+                .solid_angle
+                .replace(Arc::new(Some(self.solid_angle_calculate())));
+        }
+        self.solid_angle
+            .borrow()
+            .expect("solid angle is still None after being set")
     }
 
-    pub fn solid_angle_with_shadows(&self) -> f64 {
+    pub fn solid_angle_calculate(&self) -> f64 {
         let f = |u, v| {
             let mut blocked = false;
             let p_local = Point2::new(u, v);
@@ -210,7 +230,7 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e-6, 1e-3))
+        integral_2d(&f, u_limits, v_limits, (1e0, 1e-3)) // FIXME: Allow configuration of error limits
     }
 
     pub fn func_min_unc<F>(&self, f: &F, steps: usize) -> ValUnc
@@ -249,12 +269,15 @@ impl Simplified {
             .collect::<Vec<_>>();
         statistics(&vals)
     }
+}
 
-    pub fn solid_angle_with_shadows_unc(&self, steps: usize) -> ValUnc {
-        let vals = repeat_with(|| self.rand().solid_angle_with_shadows())
-            .take(steps)
-            .collect::<Vec<_>>();
-        statistics(&vals)
+impl Clone for Simplified {
+    fn clone(&self) -> Self {
+        Self {
+            surface: self.surface.clone(),
+            shadows: self.shadows.clone(),
+            solid_angle: Default::default(),
+        }
     }
 }
 

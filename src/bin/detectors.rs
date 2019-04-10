@@ -86,6 +86,8 @@ impl OutputData {
 }
 
 fn main() -> Result<(), Error> {
+    //rayon::ThreadPoolBuilder::new().num_threads(1).build_global().unwrap();
+
     let opt = Opt::from_args();
     let mut config = Config::new();
     for file_path in opt.files {
@@ -99,7 +101,7 @@ fn main() -> Result<(), Error> {
 
     let mut output = if let Some(steps) = opt.monte_carlo {
         detectors
-            .par_iter()
+            .into_par_iter()
             .map(|(id, surface)| OutputData {
                 det_id: id.to_vec(),
                 theta_min: surface.func_min_unc(&theta, steps),
@@ -108,7 +110,7 @@ fn main() -> Result<(), Error> {
                 phi_min: surface.func_min_unc(&phi, steps),
                 phi_max: surface.func_max_unc(&phi, steps),
                 phi_avg: surface.func_avg_unc(&phi, steps),
-                solid_angle: surface.solid_angle_with_shadows_unc(steps),
+                solid_angle: surface.solid_angle_unc(steps),
             })
             .inspect(|_| {
                 let _ = pb.lock().unwrap().inc();
@@ -116,7 +118,7 @@ fn main() -> Result<(), Error> {
             .collect::<Vec<_>>()
     } else {
         detectors
-            .par_iter()
+            .into_par_iter()
             .map(|(id, surface)| OutputData {
                 det_id: id.to_vec(),
                 theta_min: surface.func_min(&theta).into(),
@@ -125,7 +127,7 @@ fn main() -> Result<(), Error> {
                 phi_min: surface.func_min(&phi).into(),
                 phi_max: surface.func_max(&phi).into(),
                 phi_avg: surface.func_avg(&phi).into(),
-                solid_angle: surface.solid_angle_with_shadows().into(),
+                solid_angle: surface.solid_angle().into(),
             })
             .inspect(|_| {
                 let _ = pb.lock().unwrap().inc();
