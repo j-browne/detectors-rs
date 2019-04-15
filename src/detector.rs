@@ -123,7 +123,7 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e0, 1e-3)) / self.solid_angle() // FIXME: Allow configuration of error limits
+        integral_2d(&f, u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle() // FIXME: Allow configuration of error limits
     }
 
     pub fn d_solid_angle(&self, p: Point2<f64>) -> f64 {
@@ -230,7 +230,7 @@ impl Simplified {
         };
         let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
-        integral_2d(&f, u_limits, v_limits, (1e0, 1e-3)) // FIXME: Allow configuration of error limits
+        integral_2d(&f, u_limits, v_limits, (1e1, 1e-3)) // FIXME: Allow configuration of error limits
     }
 
     pub fn func_min_unc<F>(&self, f: &F, steps: usize) -> ValUnc

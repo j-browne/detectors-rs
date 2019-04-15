@@ -135,7 +135,7 @@ fn main() -> Result<(), Error> {
             .collect::<Vec<_>>()
     };
     pb.into_inner().unwrap().finish();
-    println!();
+    eprintln!();
 
     output.sort_by_key(|x| x.det_id.get(2).copied().unwrap_or(0));
     output.sort_by_key(|x| x.det_id.get(1).copied().unwrap_or(0));
