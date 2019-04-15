@@ -1,7 +1,7 @@
 {
   "templates": {
     "SORR_UP": {
-      "template": "BB15BF",
+      "template": "BB15",
       "transformations": [
         {"Rotation": [0, -90, 0]},
         {"Rotation": [0, 0, 90]},
@@ -11,7 +11,7 @@
       ]
     },
     "SORR_DN": {
-      "template": "BB15BF",
+      "template": "BB15",
       "transformations": [
         {"Rotation": [0, -90, 0]},
         {"Rotation": [0, 0, 90]},
@@ -21,7 +21,7 @@
       ]
     },
     "SIDAR_E": {
-      "template": "YY1BF",
+      "template": "YY1",
       "transformations": [
         {"Rotation": [0, 0, 90]},
         {"Translation": [0, 0, [-6.35, 0.127]]},
@@ -31,7 +31,7 @@
       ]
     },
     "SIDAR_dE": {
-      "template": "YY1BF",
+      "template": "YY1",
       "transformations": [
         {"Rotation": [0, 0, 90]},
         {"Translation": [0, 0, [-12.7, 0.127]]},
@@ -46,7 +46,7 @@
       "v_limits": [0, 360],
       "transformations": [
         {"Rotation": [-90, 0, 0]},
-        {"Translation": [0, [-5.30, 0.01], 0]}
+        {"Translation": [0, [5.30, 0.01], 0]}
       ]
     }
   },
