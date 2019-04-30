@@ -1,8 +1,11 @@
+#[macro_use] extern crate serde_derive;
+
 use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point3;
 use pbr::ProgressBar;
 use rayon::prelude::*;
 use std::{fs::File, io::stderr, path::PathBuf, sync::Mutex};
+use serde_json;
 use structopt::{clap::AppSettings, StructOpt};
 use val_unc::ValUnc;
 
@@ -33,6 +36,7 @@ fn phi(p: Point3<f64>) -> f64 {
     phi
 }
 
+#[derive(Debug, Serialize)]
 struct OutputData {
     det_id: Vec<u32>,
     theta_min: ValUnc,
@@ -42,47 +46,6 @@ struct OutputData {
     phi_max: ValUnc,
     phi_avg: ValUnc,
     solid_angle: ValUnc,
-}
-
-impl OutputData {
-    fn format(&self) -> String {
-        format!(
-            "{}\t{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}",
-            self.det_id.get(0).unwrap_or(&0) + 1,
-            self.det_id.get(1).unwrap_or(&0),
-            self.det_id.get(2).unwrap_or(&0),
-            self.theta_min.val,
-            self.theta_max.val,
-            self.theta_avg.val,
-            self.phi_min.val,
-            self.phi_max.val,
-            self.phi_avg.val,
-            self.solid_angle.val,
-        )
-    }
-
-    fn format_unc(&self) -> String {
-        format!(
-            "{}\t{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{}\t{}",
-            self.det_id.get(0).unwrap_or(&0) + 1,
-            self.det_id.get(1).unwrap_or(&0),
-            self.det_id.get(2).unwrap_or(&0),
-            self.theta_min.val,
-            self.theta_min.unc,
-            self.theta_max.val,
-            self.theta_max.unc,
-            self.theta_avg.val,
-            self.theta_avg.unc,
-            self.phi_min.val,
-            self.phi_min.unc,
-            self.phi_max.val,
-            self.phi_max.unc,
-            self.phi_avg.val,
-            self.phi_avg.unc,
-            self.solid_angle.val,
-            self.solid_angle.unc,
-        )
-    }
 }
 
 fn main() -> Result<(), Error> {
@@ -141,15 +104,7 @@ fn main() -> Result<(), Error> {
     output.sort_by_key(|x| x.det_id.get(1).copied().unwrap_or(0));
     output.sort_by_key(|x| x.det_id.get(0).copied().unwrap_or(0));
 
-    if opt.monte_carlo.is_some() {
-        for o in output {
-            println!("{}", o.format_unc());
-        }
-    } else {
-        for o in output {
-            println!("{}", o.format());
-        }
-    }
+    println!("{}", serde_json::to_string(&output)?);
 
     Ok(())
 }
