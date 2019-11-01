@@ -293,7 +293,7 @@ fn statistics(vals: &[f64]) -> ValUnc {
 }
 
 fn integral_2d(
-    f: &Fn(f64, f64) -> f64,
+    f: &dyn Fn(f64, f64) -> f64,
     u_limits: (f64, f64),
     v_limits: (f64, f64),
     eps: (f64, f64),
@@ -302,11 +302,11 @@ fn integral_2d(
     let mut iw1 = IntegrationWorkspace::new(200).unwrap();
     let mut iw2 = IntegrationWorkspace::new(200).unwrap();
 
-    type F1<'a> = fn(f64, &mut (&'a Fn(f64, f64) -> f64, f64)) -> f64;
+    type F1<'a> = fn(f64, &mut (&'a dyn Fn(f64, f64) -> f64, f64)) -> f64;
     type F2<'a> = fn(
         f64,
         &mut (
-            &'a Fn(f64, f64) -> f64,
+            &'a dyn Fn(f64, f64) -> f64,
             for<'r> fn(f64, &'r mut (&'a (dyn std::ops::Fn(f64, f64) -> f64 + 'a), f64)) -> f64,
             (f64, f64),
             (f64, f64),
@@ -352,7 +352,7 @@ fn integral_2d(
 }
 
 fn minimize_2d(
-    f: &Fn(f64, f64) -> f64,
+    f: &dyn Fn(f64, f64) -> f64,
     u_limits: (f64, f64),
     v_limits: (f64, f64),
     eps: f64,
