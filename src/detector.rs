@@ -64,6 +64,14 @@ pub struct Simplified {
 }
 
 impl Simplified {
+    pub fn surface(&self) -> &Surface {
+        &self.surface
+    }
+
+    pub fn shadows(&self) -> &Vec<Surface> {
+        &self.shadows
+    }
+
     fn rand(&self) -> Self {
         let mut other = self.clone();
         other.surface.randomize();
