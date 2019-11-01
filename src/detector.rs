@@ -126,7 +126,7 @@ impl Simplified {
         integral_2d(&f, u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle() // FIXME: Allow configuration of error limits
     }
 
-    pub fn avg_dir(&self) -> Vector3<f64> {
+    pub fn dir_avg(&self) -> Vector3<f64> {
         let f = |u, v| {
             let mut blocked = false;
             let p_local = Point2::new(u, v);
