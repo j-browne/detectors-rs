@@ -126,6 +126,36 @@ impl Simplified {
         integral_2d(&f, u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle() // FIXME: Allow configuration of error limits
     }
 
+    pub fn avg_dir(&self) -> Vector3<f64> {
+        let f = |u, v| {
+            let mut blocked = false;
+            let p_local = Point2::new(u, v);
+            let p_world = self.surface.coords_local_to_world(p_local);
+            for s in &self.shadows {
+                // TODO: Check that the shadow is between the source and the detector
+                if s.intersects(Point3::origin(), p_world) {
+                    blocked = true;
+                    break;
+                }
+            }
+
+            if blocked {
+                nalgebra::zero()
+            } else {
+                p_world.coords.normalize() * self.d_solid_angle(p_local)
+            }
+        };
+        let u_limits = (self.surface.u_limits().0.val, self.surface.u_limits().1.val);
+        let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
+
+        // FIXME: Allow configuration of error limits
+        let x = integral_2d(&|u,v| f(u,v)[0], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
+        let y = integral_2d(&|u,v| f(u,v)[1], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
+        let z = integral_2d(&|u,v| f(u,v)[2], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
+
+        Vector3::new(x, y, z)
+    }
+
     pub fn d_solid_angle(&self, p: Point2<f64>) -> f64 {
         let fu: fn(f64, &mut (f64, &Surface, usize)) -> f64 = |x, params| {
             Surface::coords_local_to_world(params.1, Point2::new(x, params.0))[params.2]
