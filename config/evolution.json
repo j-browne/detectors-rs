@@ -1,0 +1,55 @@
+{
+  "detectors": [
+    {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]}
+      ]
+    },
+    {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]}
+      ]
+    },
+    {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [[0, 0.127], [8.636, 0.127], [-80.2386, 0.127]]}
+      ]
+    },
+    {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [[0, 0.127], [8.636, 0.127], [-80.2386, 0.127]]},
+        {"Rotation": [0, 0, [6.03, 1]]}
+      ]
+    },
+    {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [[0, 0.127], [8.636, 0.127], [-80.2386, 0.127]]},
+        {"Rotation": [0, 0, [6.03, 1]]},
+        {"Translation": [[0, 0.127], [95.25, 0.127], 0]}
+      ]
+    },
+    {
+      "template": "BB15",
+      "transformations": [
+        {"Rotation": [0, -90, 0]},
+        {"Rotation": [0, 0, 90]},
+        {"Translation": [[0, 0.127], [8.636, 0.127], [-80.2386, 0.127]]},
+        {"Rotation": [0, 0, [6.03, 1]]},
+        {"Translation": [[0, 0.127], [95.25, 0.127], 0]},
+        {"Rotation": [0, 0, [30, 1]]}
+      ]
+    }
+  ]
+}
