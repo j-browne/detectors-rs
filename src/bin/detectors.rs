@@ -1,18 +1,19 @@
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 
 use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point3;
 use pbr::ProgressBar;
 use rayon::prelude::*;
-use std::{fs::File, io::stderr, path::PathBuf, sync::Mutex};
 use serde_json;
+use std::{fs::File, io::stderr, path::PathBuf, sync::Mutex};
 use structopt::StructOpt;
 use val_unc::ValUnc;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "detectors",
-    about = "A program to calculate detector properties.",
+    about = "A program to calculate detector properties."
 )]
 struct Opt {
     #[structopt(short = "m")]

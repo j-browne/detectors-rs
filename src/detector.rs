@@ -149,9 +149,12 @@ impl Simplified {
         let v_limits = (self.surface.v_limits().0.val, self.surface.v_limits().1.val);
 
         // FIXME: Allow configuration of error limits
-        let x = integral_2d(&|u,v| f(u,v)[0], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
-        let y = integral_2d(&|u,v| f(u,v)[1], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
-        let z = integral_2d(&|u,v| f(u,v)[2], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
+        let x =
+            integral_2d(&|u, v| f(u, v)[0], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
+        let y =
+            integral_2d(&|u, v| f(u, v)[1], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
+        let z =
+            integral_2d(&|u, v| f(u, v)[2], u_limits, v_limits, (1e1, 1e-3)) / self.solid_angle();
 
         Vector3::new(x, y, z)
     }
@@ -334,11 +337,23 @@ fn statistics_vec(vals: &[Vector3<f64>]) -> (Vector3<f64>, Vector3<f64>) {
     let vals_y = vals.iter().map(|x| x[1]).collect::<Vec<_>>();
     let vals_z = vals.iter().map(|x| x[2]).collect::<Vec<_>>();
 
-    let ValUnc{val: val_x, unc: unc_x} = statistics(&vals_x);
-    let ValUnc{val: val_y, unc: unc_y} = statistics(&vals_y);
-    let ValUnc{val: val_z, unc: unc_z} = statistics(&vals_z);
+    let ValUnc {
+        val: val_x,
+        unc: unc_x,
+    } = statistics(&vals_x);
+    let ValUnc {
+        val: val_y,
+        unc: unc_y,
+    } = statistics(&vals_y);
+    let ValUnc {
+        val: val_z,
+        unc: unc_z,
+    } = statistics(&vals_z);
 
-    (Vector3::new(val_x, val_y, val_z), Vector3::new(unc_x, unc_y, unc_z))
+    (
+        Vector3::new(val_x, val_y, val_z),
+        Vector3::new(unc_x, unc_y, unc_z),
+    )
 }
 
 fn integral_2d(
