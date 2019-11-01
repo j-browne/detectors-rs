@@ -293,6 +293,13 @@ impl Simplified {
         statistics(&vals)
     }
 
+    pub fn dir_avg_unc(&self, steps: usize) -> (Vector3<f64>, Vector3<f64>) {
+        let vals = repeat_with(|| self.rand().dir_avg())
+            .take(steps)
+            .collect::<Vec<_>>();
+        statistics_vec(&vals)
+    }
+
     pub fn solid_angle_unc(&self, steps: usize) -> ValUnc {
         let vals = repeat_with(|| self.rand().solid_angle())
             .take(steps)
@@ -320,6 +327,18 @@ fn statistics(vals: &[f64]) -> ValUnc {
         val: mean,
         unc: std_dev,
     }
+}
+
+fn statistics_vec(vals: &[Vector3<f64>]) -> (Vector3<f64>, Vector3<f64>) {
+    let vals_x = vals.iter().map(|x| x[0]).collect::<Vec<_>>();
+    let vals_y = vals.iter().map(|x| x[1]).collect::<Vec<_>>();
+    let vals_z = vals.iter().map(|x| x[2]).collect::<Vec<_>>();
+
+    let ValUnc{val: val_x, unc: unc_x} = statistics(&vals_x);
+    let ValUnc{val: val_y, unc: unc_y} = statistics(&vals_y);
+    let ValUnc{val: val_z, unc: unc_z} = statistics(&vals_z);
+
+    (Vector3::new(val_x, val_y, val_z), Vector3::new(unc_x, unc_y, unc_z))
 }
 
 fn integral_2d(
