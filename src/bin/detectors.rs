@@ -6,16 +6,13 @@ use pbr::ProgressBar;
 use rayon::prelude::*;
 use std::{fs::File, io::stderr, path::PathBuf, sync::Mutex};
 use serde_json;
-use structopt::{clap::AppSettings, StructOpt};
+use structopt::StructOpt;
 use val_unc::ValUnc;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "detectors",
     about = "A program to calculate detector properties.",
-    version = "",
-    author = "",
-    raw(global_settings = "&[AppSettings::DisableVersion]")
 )]
 struct Opt {
     #[structopt(short = "m")]
