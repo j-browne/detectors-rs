@@ -26,12 +26,32 @@ fn theta(p: Point3<f64>) -> f64 {
     f64::acos(p[2] / f64::sqrt(p[0].powi(2) + p[1].powi(2) + p[2].powi(2))).to_degrees()
 }
 
+fn theta_diff(avg: f64) -> impl Fn(Point3<f64>) -> f64 {
+    move |p: Point3<f64>| theta(p) - avg
+}
+
 fn phi(p: Point3<f64>) -> f64 {
-    let mut phi = f64::atan2(p[0], p[1]).to_degrees();
+    let phi = f64::atan2(p[0], p[1]).to_degrees();
     if phi < 0.0 {
-        phi += 360.0
-    };
-    phi
+        phi + 360.0
+    } else {
+        phi
+    }
+}
+
+fn phi_diff(avg: f64) -> impl Fn(Point3<f64>) -> f64 {
+    move |p: Point3<f64>| {
+        let phi = f64::atan2(p[0], p[1]).to_degrees();
+        let diff = phi - avg;
+
+        if diff < -180.0 {
+            diff + 360.0
+        } else if diff > 180.0 {
+            diff - 360.0
+        } else {
+            diff
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -87,19 +107,23 @@ fn main() -> Result<(), Error> {
         detectors
             .into_par_iter()
             .map(|(id, surface)| {
+                let det_id = id.to_vec();
                 let dir_avg = surface.dir_avg();
+
                 let theta_avg = theta(dir_avg.into());
+                let theta_min = (surface.func_min(&theta_diff(theta_avg)) + theta_avg).into();
+                let theta_max = (surface.func_max(&theta_diff(theta_avg)) + theta_avg).into();
+                let theta_avg = theta_avg.into();
+
                 let phi_avg = phi(dir_avg.into());
+                let phi_min = (surface.func_min(&phi_diff(phi_avg)) + phi_avg).into();
+                let phi_max = (surface.func_max(&phi_diff(phi_avg)) + phi_avg).into();
+                let phi_avg = phi_avg.into();
+
+                let solid_angle = surface.solid_angle().into();
 
                 OutputData {
-                    det_id: id.to_vec(),
-                    theta_min: surface.func_min(&theta).into(),
-                    theta_max: surface.func_max(&theta).into(),
-                    theta_avg: theta_avg.into(),
-                    phi_min: surface.func_min(&phi).into(),
-                    phi_max: surface.func_max(&phi).into(),
-                    phi_avg: phi_avg.into(),
-                    solid_angle: surface.solid_angle().into(),
+                    det_id, theta_min, theta_max, theta_avg, phi_min, phi_max, phi_avg, solid_angle,
                 }
             })
             .inspect(|_| {
