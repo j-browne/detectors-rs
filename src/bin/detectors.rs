@@ -62,15 +62,21 @@ fn main() -> Result<(), Error> {
     let mut output = if let Some(steps) = opt.monte_carlo {
         detectors
             .into_par_iter()
-            .map(|(id, surface)| OutputData {
-                det_id: id.to_vec(),
-                theta_min: surface.func_min_unc(&theta, steps),
-                theta_max: surface.func_max_unc(&theta, steps),
-                theta_avg: surface.func_avg_unc(&theta, steps),
-                phi_min: surface.func_min_unc(&phi, steps),
-                phi_max: surface.func_max_unc(&phi, steps),
-                phi_avg: surface.func_avg_unc(&phi, steps),
-                solid_angle: surface.solid_angle_unc(steps),
+            .map(|(id, surface)| {
+                let (dir_avg, _dir_avg_unc) = surface.dir_avg_unc(steps);
+                let theta_avg = theta(dir_avg.into());
+                let phi_avg = phi(dir_avg.into());
+
+                OutputData {
+                    det_id: id.to_vec(),
+                    theta_min: surface.func_min_unc(&theta, steps),
+                    theta_max: surface.func_max_unc(&theta, steps),
+                    theta_avg: theta_avg.into(), //FIXME: No unc
+                    phi_min: surface.func_min_unc(&phi, steps),
+                    phi_max: surface.func_max_unc(&phi, steps),
+                    phi_avg: phi_avg.into(), //FIXME: No unc
+                    solid_angle: surface.solid_angle_unc(steps),
+                }
             })
             .inspect(|_| {
                 let _ = pb.lock().unwrap().inc();
@@ -79,15 +85,21 @@ fn main() -> Result<(), Error> {
     } else {
         detectors
             .into_par_iter()
-            .map(|(id, surface)| OutputData {
-                det_id: id.to_vec(),
-                theta_min: surface.func_min(&theta).into(),
-                theta_max: surface.func_max(&theta).into(),
-                theta_avg: surface.func_avg(&theta).into(),
-                phi_min: surface.func_min(&phi).into(),
-                phi_max: surface.func_max(&phi).into(),
-                phi_avg: surface.func_avg(&phi).into(),
-                solid_angle: surface.solid_angle().into(),
+            .map(|(id, surface)| {
+                let dir_avg = surface.dir_avg();
+                let theta_avg = theta(dir_avg.into());
+                let phi_avg = phi(dir_avg.into());
+
+                OutputData {
+                    det_id: id.to_vec(),
+                    theta_min: surface.func_min(&theta).into(),
+                    theta_max: surface.func_max(&theta).into(),
+                    theta_avg: theta_avg.into(),
+                    phi_min: surface.func_min(&phi).into(),
+                    phi_max: surface.func_max(&phi).into(),
+                    phi_avg: phi_avg.into(),
+                    solid_angle: surface.solid_angle().into(),
+                }
             })
             .inspect(|_| {
                 let _ = pb.lock().unwrap().inc();
