@@ -39,6 +39,7 @@ fn main() -> Result<(), Error> {
                 let p = surface.coords_local_to_world(Point2::new(u, v));
                 println!("{} {} {}", p[0], p[1], p[2]);
             }
+            println!();
         }
         println!();
     }
