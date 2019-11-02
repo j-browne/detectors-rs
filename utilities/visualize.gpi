@@ -1,9 +1,8 @@
 if (ARGC < 1) {
-  print "Usage: gunplot -e \"call '", ARG0, "' '<data_file>'\" -";
+  print "Usage: gnuplot -e \"call '", ARG0, "' '<data_file>'\" -";
   exit;
 }
 
-print ARG1;
 filename = ARG1;
 
 set hidden3d nooffset;
@@ -17,6 +16,7 @@ set tmargin screen 1;
 set bmargin screen 0.1;
 set lmargin screen 0.2;
 set rmargin screen 0.9;
+set key off;
 
 stats filename nooutput;
 splot for [i=0:STATS_blocks] filename u 3:1:2 index i w l t sprintf("%d", i);
