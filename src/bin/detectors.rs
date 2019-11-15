@@ -6,19 +6,33 @@ use nalgebra::Point3;
 use pbr::ProgressBar;
 use rayon::prelude::*;
 use serde_json;
-use std::{fs::File, io::stderr, path::PathBuf, sync::Mutex};
+use std::{
+    fs::File,
+    io::{stderr, stdout, Write},
+    path::PathBuf,
+    sync::Mutex,
+};
 use structopt::StructOpt;
 use val_unc::ValUnc;
 
 #[derive(Debug, StructOpt)]
-#[structopt(
-    name = "detectors",
-    about = "A program to calculate detector properties."
-)]
+#[structopt(name = "detectors", no_version)]
+/// A program to calculate detector properties.
 struct Opt {
-    #[structopt(short = "m")]
+    #[structopt(short, long)]
+    /// Suppresses the output of the progress bar.
+    quiet: bool,
+    #[structopt(short, name = "steps")]
+    /// Perform a Monte Carlo simulation with <steps> iterations.
+    ///
+    /// This option causes the program to do multiple runs for each detector, varying the
+    /// transformation parameters based on their uncertainties and calculating the uncertainties of
+    /// the resulting properties.
     monte_carlo: Option<usize>,
-    #[structopt(name = "FILE", parse(from_os_str))]
+    #[structopt(parse(from_os_str))]
+    /// The input files specifying the detector geometry.
+    ///
+    /// The input format is JSON.
     files: Vec<PathBuf>,
 }
 
@@ -70,6 +84,16 @@ fn main() -> Result<(), Error> {
     //rayon::ThreadPoolBuilder::new().num_threads(1).build_global().unwrap();
 
     let opt = Opt::from_args();
+    if opt.files.len() < 1 {
+        let mut out = stdout();
+        Opt::clap()
+            .write_help(&mut out)
+            .expect("failed to write to stdout");
+        writeln!(&mut out)?;
+        return Ok(());
+    }
+    let quiet = opt.quiet;
+
     let mut config = Config::new();
     for file_path in opt.files {
         let file = File::open(file_path)?;
@@ -77,8 +101,11 @@ fn main() -> Result<(), Error> {
     }
 
     let detectors = config.simplify()?;
+
     let pb = Mutex::new(ProgressBar::on(stderr(), detectors.len() as u64));
-    pb.lock().unwrap().set(0);
+    if !quiet {
+        pb.lock().unwrap().set(0);
+    }
 
     let mut output = if let Some(steps) = opt.monte_carlo {
         detectors
@@ -100,7 +127,9 @@ fn main() -> Result<(), Error> {
                 }
             })
             .inspect(|_| {
-                let _ = pb.lock().unwrap().inc();
+                if !quiet {
+                    let _ = pb.lock().unwrap().inc();
+                }
             })
             .collect::<Vec<_>>()
     } else {
@@ -123,16 +152,28 @@ fn main() -> Result<(), Error> {
                 let solid_angle = surface.solid_angle().into();
 
                 OutputData {
-                    det_id, theta_min, theta_max, theta_avg, phi_min, phi_max, phi_avg, solid_angle,
+                    det_id,
+                    theta_min,
+                    theta_max,
+                    theta_avg,
+                    phi_min,
+                    phi_max,
+                    phi_avg,
+                    solid_angle,
                 }
             })
             .inspect(|_| {
-                let _ = pb.lock().unwrap().inc();
+                if !quiet {
+                    let _ = pb.lock().unwrap().inc();
+                }
             })
             .collect::<Vec<_>>()
     };
-    pb.into_inner().unwrap().finish();
-    eprintln!();
+
+    if !quiet {
+        pb.into_inner().unwrap().finish();
+        eprintln!();
+    }
 
     output.sort_by_key(|x| x.det_id.get(2).copied().unwrap_or(0));
     output.sort_by_key(|x| x.det_id.get(1).copied().unwrap_or(0));

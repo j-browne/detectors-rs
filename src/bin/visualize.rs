@@ -34,9 +34,11 @@ fn main() -> Result<(), Error> {
         let v_limits = surface.v_limits_val();
 
         for u_idx in 0..max_u {
-            let u = f64::from(u_idx) * (u_limits.1 - u_limits.0) / f64::from(max_u - 1) + u_limits.0;
+            let u =
+                f64::from(u_idx) * (u_limits.1 - u_limits.0) / f64::from(max_u - 1) + u_limits.0;
             for v_idx in 0..max_v {
-                let v = f64::from(v_idx) * (v_limits.1 - v_limits.0) / f64::from(max_v - 1) + v_limits.0;
+                let v = f64::from(v_idx) * (v_limits.1 - v_limits.0) / f64::from(max_v - 1)
+                    + v_limits.0;
 
                 let p = surface.coords_local_to_world(Point2::new(u, v));
                 println!("{} {} {}", p[0], p[1], p[2]);
