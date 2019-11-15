@@ -87,7 +87,7 @@ fn main() -> Result<(), Error> {
     if opt.files.len() < 1 {
         let mut out = stdout();
         Opt::clap()
-            .write_help(&mut out)
+            .write_long_help(&mut out)
             .expect("failed to write to stdout");
         writeln!(&mut out)?;
         return Ok(());

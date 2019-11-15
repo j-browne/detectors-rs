@@ -1,22 +1,39 @@
 use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point2;
-use std::{fs::File, path::PathBuf};
+use std::{
+    fs::File,
+    io::{stdout, Write},
+    path::PathBuf,
+};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
-#[structopt(
-    name = "detectors",
-    about = "A program to calculate detector properties."
-)]
+#[structopt(name = "visualize", no_version)]
+/// A program to output a grid of points for each detector for use with gnuplot.
 struct Opt {
-    #[structopt(short = "g", default_value = "10")]
+    #[structopt(short, name = "sections", default_value = "10")]
+    /// The number of grid sections for each direction.
+    ///
+    /// Note that the total number of grid points is (<sections> + 1)^2.
     grid: u32,
-    #[structopt(name = "FILE", parse(from_os_str))]
+    #[structopt(parse(from_os_str))]
+    /// The input files specifying the detector geometry.
+    ///
+    /// The input format is JSON.
     files: Vec<PathBuf>,
 }
 
 fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
+    if opt.files.len() < 1 {
+        let mut out = stdout();
+        Opt::clap()
+            .write_long_help(&mut out)
+            .expect("failed to write to stdout");
+        writeln!(&mut out)?;
+        return Ok(());
+    }
+
     let mut config = Config::new();
     for file_path in opt.files {
         let file = File::open(file_path)?;
