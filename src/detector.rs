@@ -173,60 +173,32 @@ impl Simplified {
         };
         let mut dr_du = Vector3::new(0.0, 0.0, 0.0);
         let mut dr_du_err = Vector3::new(0.0, 0.0, 0.0);
-        deriv_central(
-            fu,
-            &mut (p[1], &self.surface, 0),
-            0.0,
-            1e-8, // FIXME: Allow configuration of error limits
-            &mut dr_du[0],
-            &mut dr_du_err[0],
-        );
-        deriv_central(
-            fu,
-            &mut (p[1], &self.surface, 1),
-            0.0,
-            1e-8, // FIXME: Allow configuration of error limits
-            &mut dr_du[1],
-            &mut dr_du_err[1],
-        );
-        deriv_central(
-            fu,
-            &mut (p[1], &self.surface, 2),
-            0.0,
-            1e-8, // FIXME: Allow configuration of error limits
-            &mut dr_du[2],
-            &mut dr_du_err[2],
-        );
+        for i in 0..3 {
+            deriv_central(
+                fu,
+                &mut (p[1], &self.surface, i),
+                0.0,
+                1e-8, // FIXME: Allow configuration of error limits
+                &mut dr_du[i],
+                &mut dr_du_err[i],
+            );
+        }
 
         let fv: fn(f64, &mut (f64, &Surface, usize)) -> f64 = |x, params| {
             Surface::coords_local_to_world(params.1, Point2::new(params.0, x))[params.2]
         };
         let mut dr_dv = Vector3::new(0.0, 0.0, 0.0);
         let mut dr_dv_err = Vector3::new(0.0, 0.0, 0.0);
-        deriv_central(
-            fv,
-            &mut (p[0], &self.surface, 0),
-            0.0,
-            1e-8, // FIXME: Allow configuration of error limits
-            &mut dr_dv[0],
-            &mut dr_dv_err[0],
-        );
-        deriv_central(
-            fv,
-            &mut (p[0], &self.surface, 1),
-            0.0,
-            1e-8, // FIXME: Allow configuration of error limits
-            &mut dr_dv[1],
-            &mut dr_dv_err[1],
-        );
-        deriv_central(
-            fv,
-            &mut (p[0], &self.surface, 2),
-            0.0,
-            1e-8, // FIXME: Allow configuration of error limits
-            &mut dr_dv[2],
-            &mut dr_dv_err[2],
-        );
+        for i in 0..3 {
+            deriv_central(
+                fv,
+                &mut (p[0], &self.surface, i),
+                0.0,
+                1e-8, // FIXME: Allow configuration of error limits
+                &mut dr_dv[i],
+                &mut dr_dv_err[i],
+            );
+        }
 
         // Surface area
         // dS = dr/du x dr/dv
