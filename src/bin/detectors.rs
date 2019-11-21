@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate serde_derive;
 
-use detectors_rs::{config::Config, error::Error};
+use detectors_rs::{config::Config, error::Error, statistics::stats};
 use nalgebra::Point3;
 use pbr::ProgressBar;
 use rayon::prelude::*;
@@ -115,15 +115,27 @@ fn main() -> Result<(), Error> {
                 let theta_avg = theta(dir_avg.into());
                 let phi_avg = phi(dir_avg.into());
 
+                let mut buffer = Vec::with_capacity(steps);
+                surface.func_min_monte_carlo(&theta, steps, &mut buffer);
+                let theta_min = stats(&buffer);
+                surface.func_max_monte_carlo(&theta, steps, &mut buffer);
+                let theta_max = stats(&buffer);
+                surface.func_min_monte_carlo(&phi, steps, &mut buffer);
+                let phi_min = stats(&buffer);
+                surface.func_max_monte_carlo(&phi, steps, &mut buffer);
+                let phi_max = stats(&buffer);
+                surface.solid_angle_monte_carlo(steps, &mut buffer);
+                let solid_angle = stats(&buffer);
+
                 OutputData {
                     det_id: id.to_vec(),
-                    theta_min: surface.func_min_unc(&theta, steps),
-                    theta_max: surface.func_max_unc(&theta, steps),
+                    theta_min,
+                    theta_max,
                     theta_avg: theta_avg.into(), //FIXME: No unc
-                    phi_min: surface.func_min_unc(&phi, steps),
-                    phi_max: surface.func_max_unc(&phi, steps),
+                    phi_min,
+                    phi_max,
                     phi_avg: phi_avg.into(), //FIXME: No unc
-                    solid_angle: surface.solid_angle_unc(steps),
+                    solid_angle,
                 }
             })
             .inspect(|_| {

@@ -1,5 +1,6 @@
 use crate::{
     error::Error,
+    statistics::{stats, stats_vec},
     surface::{MaybeTemplate, Surface},
 };
 use nalgebra::{Point2, Point3, Vector3};
@@ -246,6 +247,48 @@ impl Simplified {
         integral_2d(&f, u_limits, v_limits, (1e1, 1e-3)) // FIXME: Allow configuration of error limits
     }
 
+    pub fn func_min_monte_carlo<F>(&self, f: &F, steps: usize, v: &mut Vec<f64>)
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        v.clear();
+        v.reserve(steps);
+        v.extend(repeat_with(|| self.rand().func_min(f)).take(steps));
+    }
+
+    pub fn func_max_monte_carlo<F>(&self, f: &F, steps: usize, v: &mut Vec<f64>)
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        v.clear();
+        v.reserve(steps);
+        v.extend(repeat_with(|| self.rand().func_max(f)).take(steps));
+    }
+
+    pub fn func_avg_monte_carlo<F>(&self, f: &F, steps: usize, v: &mut Vec<f64>)
+    where
+        F: Fn(Point3<f64>) -> f64,
+    {
+        v.clear();
+        v.reserve(steps);
+        v.extend(repeat_with(|| self.rand().func_avg(f)).take(steps));
+    }
+
+    /*
+        pub fn dir_avg_monte_carlo(&self, steps: usize) -> (Vector3<f64>, Vector3<f64>) {
+            let vals = repeat_with(|| self.rand().dir_avg())
+                .take(steps)
+                .collect::<Vec<_>>();
+            stats_vec(&vals)
+        }
+    */
+
+    pub fn solid_angle_monte_carlo(&self, steps: usize, v: &mut Vec<f64>) {
+        v.clear();
+        v.reserve(steps);
+        v.extend(repeat_with(|| self.rand().solid_angle()).take(steps));
+    }
+
     pub fn func_min_unc<F>(&self, f: &F, steps: usize) -> ValUnc
     where
         F: Fn(Point3<f64>) -> f64,
@@ -253,7 +296,7 @@ impl Simplified {
         let vals = repeat_with(|| self.rand().func_min(f))
             .take(steps)
             .collect::<Vec<_>>();
-        statistics(&vals)
+        stats(&vals)
     }
 
     pub fn func_max_unc<F>(&self, f: &F, steps: usize) -> ValUnc
@@ -263,7 +306,7 @@ impl Simplified {
         let vals = repeat_with(|| self.rand().func_max(f))
             .take(steps)
             .collect::<Vec<_>>();
-        statistics(&vals)
+        stats(&vals)
     }
 
     pub fn func_avg_unc<F>(&self, f: &F, steps: usize) -> ValUnc
@@ -273,21 +316,21 @@ impl Simplified {
         let vals = repeat_with(|| self.rand().func_avg(f))
             .take(steps)
             .collect::<Vec<_>>();
-        statistics(&vals)
+        stats(&vals)
     }
 
     pub fn dir_avg_unc(&self, steps: usize) -> (Vector3<f64>, Vector3<f64>) {
         let vals = repeat_with(|| self.rand().dir_avg())
             .take(steps)
             .collect::<Vec<_>>();
-        statistics_vec(&vals)
+        stats_vec(&vals)
     }
 
     pub fn solid_angle_unc(&self, steps: usize) -> ValUnc {
         let vals = repeat_with(|| self.rand().solid_angle())
             .take(steps)
             .collect::<Vec<_>>();
-        statistics(&vals)
+        stats(&vals)
     }
 }
 
@@ -299,41 +342,6 @@ impl Clone for Simplified {
             solid_angle: Default::default(),
         }
     }
-}
-
-fn statistics(vals: &[f64]) -> ValUnc {
-    let mean = vals.iter().sum::<f64>() / (vals.len() as f64);
-    let std_dev = (vals.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>()
-        / ((vals.len() - 1) as f64))
-        .sqrt();
-    ValUnc {
-        val: mean,
-        unc: std_dev,
-    }
-}
-
-fn statistics_vec(vals: &[Vector3<f64>]) -> (Vector3<f64>, Vector3<f64>) {
-    let vals_x = vals.iter().map(|x| x[0]).collect::<Vec<_>>();
-    let vals_y = vals.iter().map(|x| x[1]).collect::<Vec<_>>();
-    let vals_z = vals.iter().map(|x| x[2]).collect::<Vec<_>>();
-
-    let ValUnc {
-        val: val_x,
-        unc: unc_x,
-    } = statistics(&vals_x);
-    let ValUnc {
-        val: val_y,
-        unc: unc_y,
-    } = statistics(&vals_y);
-    let ValUnc {
-        val: val_z,
-        unc: unc_z,
-    } = statistics(&vals_z);
-
-    (
-        Vector3::new(val_x, val_y, val_z),
-        Vector3::new(unc_x, unc_y, unc_z),
-    )
 }
 
 fn integral_2d(

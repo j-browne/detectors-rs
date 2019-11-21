@@ -6,6 +6,7 @@ pub mod config;
 pub mod coordinates;
 pub(crate) mod detector;
 pub mod error;
+pub mod statistics;
 pub(crate) mod surface;
 
 pub use crate::detector::Detector;
