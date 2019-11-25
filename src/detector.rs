@@ -274,14 +274,11 @@ impl Simplified {
         v.extend(repeat_with(|| self.rand().func_avg(f)).take(steps));
     }
 
-    /*
-        pub fn dir_avg_monte_carlo(&self, steps: usize) -> (Vector3<f64>, Vector3<f64>) {
-            let vals = repeat_with(|| self.rand().dir_avg())
-                .take(steps)
-                .collect::<Vec<_>>();
-            stats_vec(&vals)
-        }
-    */
+    pub fn dir_avg_monte_carlo(&self, steps: usize, v: &mut Vec<Vector3<f64>>) {
+        v.clear();
+        v.reserve(steps);
+        v.extend(repeat_with(|| self.rand().dir_avg()).take(steps));
+    }
 
     pub fn solid_angle_monte_carlo(&self, steps: usize, v: &mut Vec<f64>) {
         v.clear();

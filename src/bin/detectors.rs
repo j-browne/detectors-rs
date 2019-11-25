@@ -111,9 +111,18 @@ fn main() -> Result<(), Error> {
         detectors
             .into_par_iter()
             .map(|(id, surface)| {
-                let (dir_avg, _dir_avg_unc) = surface.dir_avg_unc(steps);
-                let theta_avg = theta(dir_avg.into());
-                let phi_avg = phi(dir_avg.into());
+                let mut buffer = Vec::with_capacity(steps);
+                surface.dir_avg_monte_carlo(steps, &mut buffer);
+                let thetas = buffer
+                    .iter()
+                    .map(|x| theta(Point3::from(*x)))
+                    .collect::<Vec<_>>();
+                let theta_avg = stats(&thetas);
+                let phis = buffer
+                    .iter()
+                    .map(|x| phi(Point3::from(*x)))
+                    .collect::<Vec<_>>();
+                let phi_avg = stats(&phis);
 
                 let mut buffer = Vec::with_capacity(steps);
                 surface.func_min_monte_carlo(&theta, steps, &mut buffer);
@@ -131,10 +140,10 @@ fn main() -> Result<(), Error> {
                     det_id: id.to_vec(),
                     theta_min,
                     theta_max,
-                    theta_avg: theta_avg.into(), //FIXME: No unc
+                    theta_avg,
                     phi_min,
                     phi_max,
-                    phi_avg: phi_avg.into(), //FIXME: No unc
+                    phi_avg,
                     solid_angle,
                 }
             })
