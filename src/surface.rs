@@ -75,7 +75,7 @@ impl Base {
     /// This just clones `self` and adds the id because `Surface`
     /// is just an alias of `Base`.
     pub fn simplify(self, id: Vec<u32>) -> (Vec<u32>, Surface) {
-        (id, self.clone())
+        (id, self)
     }
 
     pub fn coords_local_to_world(&self, p: Point2<f64>) -> Point3<f64> {

@@ -25,7 +25,7 @@ struct Opt {
 
 fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
-    if opt.files.len() < 1 {
+    if opt.files.is_empty() {
         let mut out = stdout();
         Opt::clap()
             .write_long_help(&mut out)

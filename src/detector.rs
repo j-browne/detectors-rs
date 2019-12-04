@@ -28,7 +28,7 @@ impl Raw {
     ) -> Result<Vec<(Vec<u32>, Simplified)>, Error> {
         let Raw { surface, shadows } = self;
 
-        let surface = surface.apply_templates(templates)?.simplify(id.clone());
+        let surface = surface.apply_templates(templates)?.simplify(id);
 
         let shadows = shadows
             .iter()
