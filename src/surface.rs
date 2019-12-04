@@ -72,7 +72,7 @@ impl Base {
 
     /// Converts a `Base` to a `Surface` with an id.
     ///
-    /// This just clones `self` and adds the id because `Surface`
+    /// This just returns `self` and adds the id because `Surface`
     /// is just an alias of `Base`.
     pub fn simplify(self, id: Vec<u32>) -> (Vec<u32>, Surface) {
         (id, self)
