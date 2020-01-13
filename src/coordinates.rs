@@ -5,14 +5,30 @@ use val_unc::ValUnc;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum CoordinateSystem {
+    CartesianX,
+    CartesianY,
     CartesianZ,
+    PolarX,
+    PolarY,
     PolarZ,
 }
 
 impl CoordinateSystem {
     pub fn local_to_world(self, p: Point2<f64>) -> Point3<f64> {
         match self {
+            CoordinateSystem::CartesianX => Point3::new(0.0, p[0], p[1]),
+            CoordinateSystem::CartesianY => Point3::new(p[1], 0.0, p[0]),
             CoordinateSystem::CartesianZ => Point3::new(p[0], p[1], 0.0),
+            CoordinateSystem::PolarX => Point3::new(
+                0.0,
+                p[0] * f64::cos(p[1].to_radians()),
+                p[0] * f64::sin(p[1].to_radians()),
+            ),
+            CoordinateSystem::PolarY => Point3::new(
+                p[0] * f64::sin(p[1].to_radians()),
+                0.0,
+                p[0] * f64::cos(p[1].to_radians()),
+            ),
             CoordinateSystem::PolarZ => Point3::new(
                 p[0] * f64::cos(p[1].to_radians()),
                 p[0] * f64::sin(p[1].to_radians()),
@@ -23,7 +39,19 @@ impl CoordinateSystem {
 
     pub fn world_to_local(self, p: Point3<f64>) -> Point3<f64> {
         match self {
-            CoordinateSystem::CartesianZ => p,
+            CoordinateSystem::CartesianX => Point3::new(p[1], p[2], p[0]),
+            CoordinateSystem::CartesianY => Point3::new(p[2], p[0], p[1]),
+            CoordinateSystem::CartesianZ => Point3::new(p[0], p[1], p[2]),
+            CoordinateSystem::PolarX => {
+                let rho = f64::sqrt(p[1].powi(2) + p[2].powi(2));
+                let phi = f64::atan2(p[2], p[1]);
+                Point3::new(rho, phi.to_degrees(), p[0])
+            }
+            CoordinateSystem::PolarY => {
+                let rho = f64::sqrt(p[2].powi(2) + p[0].powi(2));
+                let phi = f64::atan2(p[0], p[2]);
+                Point3::new(rho, phi.to_degrees(), p[1])
+            }
             CoordinateSystem::PolarZ => {
                 let rho = f64::sqrt(p[0].powi(2) + p[1].powi(2));
                 let phi = f64::atan2(p[1], p[0]);
