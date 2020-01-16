@@ -1,0 +1,73 @@
+{
+  "detectors": [
+    {
+      "template": "box"
+    },
+    {
+      "coords": "PolarZ",
+      "u_limits": [0, 1.5],
+      "v_limits": [0, 360],
+      "transformations": [
+        { "Translation": [0, 0, 1] }
+      ]
+    },
+    {
+      "coords": "PolarZ",
+      "u_limits": [0, 1.5],
+      "v_limits": [0, 360],
+      "transformations": [
+        { "Translation": [0, 0, 1] }
+      ],
+      "shadows": [
+        {
+          "template": "box"
+        }
+      ]
+    }
+  ],
+  "templates": {
+    "box": {
+      "surfaces": [
+        {
+          "coords": "CartesianZ",
+          "u_limits": [0, 1],
+          "v_limits": [-1, 1],
+          "transformations": [
+            { "Rotation": [0, -90, 0] },
+            { "Translation": [-1, 0, 0] }
+          ]
+        },
+        {
+          "coords": "CartesianZ",
+          "u_limits": [0, 1],
+          "v_limits": [-1, 1],
+          "transformations": [
+            { "Rotation": [0, -90, 0] },
+            { "Translation": [-1, 0, 0] },
+            { "Rotation": [0, 0, 90] }
+          ]
+        },
+        {
+          "coords": "CartesianZ",
+          "u_limits": [0, 1],
+          "v_limits": [-1, 1],
+          "transformations": [
+            { "Rotation": [0, -90, 0] },
+            { "Translation": [-1, 0, 0] },
+            { "Rotation": [0, 0, 180] }
+          ]
+        },
+        {
+          "coords": "CartesianZ",
+          "u_limits": [0, 1],
+          "v_limits": [-1, 1],
+          "transformations": [
+            { "Rotation": [0, -90, 0] },
+            { "Translation": [-1, 0, 0] },
+            { "Rotation": [0, 0, 270] }
+          ]
+        }
+      ]
+    }
+  }
+}
