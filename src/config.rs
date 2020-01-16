@@ -6,6 +6,7 @@ use crate::{
 use std::{collections::HashMap, io::Read};
 
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     detectors: Vec<DetectorRaw>,
