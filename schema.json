@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Config",
+  "type": "object",
+  "properties": {
+    "detectors": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Detector" }
+    },
+    "templates": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/Detector" }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "CoordinateSystem": {
+      "enum": [
+        "CartesianX",
+        "CartesianY",
+        "CartesianZ",
+        "PolarX",
+        "PolarY",
+        "PolarZ"
+      ]
+    },
+    "Detector": {
+      "anyOf": [
+        { "$ref": "#/definitions/Detector/Base" },
+        { "$ref": "#/definitions/Detector/Group" },
+        { "$ref": "#/definitions/Detector/Template" }
+      ],
+      "NotTemplate": {
+        "anyOf": [
+          { "$ref": "#/definitions/Detector/Base" },
+          { "$ref": "#/definitions/Detector/Group" }
+        ]
+      },
+      "Base": {
+        "type": "object",
+        "required": ["coords", "u_limits", "v_limits" ],
+        "properties": {
+          "coords": { "$ref": "#/definitions/CoordinateSystem" },
+          "u_limits": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ValUnc" },
+            "maxItems": 2,
+            "minItems": 2
+          },
+          "v_limits": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ValUnc" },
+            "maxItems": 2,
+            "minItems": 2
+          },
+          "transformations": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Transformation" }
+          },
+          "shadows": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Detector" }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Group": {
+        "type": "object",
+        "required": ["surfaces"],
+        "properties": {
+          "surfaces": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Detector/NotTemplate" }
+          },
+          "transformations": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Transformation" }
+          },
+          "shadows": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Detector" }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Template": {
+        "type": "object",
+        "required": [ "template" ],
+        "properties": {
+          "template": {
+            "type": "string"
+          },
+          "transformations": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Transformation" }
+          },
+          "shadows": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Detector" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "Transformation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["Rotation"],
+          "properties": {
+            "Rotation": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ValUnc" },
+              "maxItems": 3,
+              "minItems": 3
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["Translation"],
+          "properties": {
+            "Translation": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ValUnc" },
+              "maxItems": 3,
+              "minItems": 3
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ValUnc": {
+      "anyOf": [
+        { "type": "number"},
+        {
+          "type": "array",
+          "items": { "type": "number" },
+          "maxItems": 2,
+          "minItems": 2
+        }
+      ]
+    }
+  }
+}
