@@ -1,5 +1,5 @@
-use detectors_rs::{config::Config, error::Error};
 use nalgebra::Point2;
+use raumlehre::{config::Config, error::Error};
 use std::{
     fs::File,
     io::{stdout, Write},

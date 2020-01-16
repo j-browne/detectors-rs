@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate serde_derive;
 
-use detectors_rs::{config::Config, error::Error, statistics::stats};
 use nalgebra::Point3;
 use pbr::ProgressBar;
+use raumlehre::{config::Config, error::Error, statistics::stats};
 use rayon::prelude::*;
 use serde_json;
 use std::{

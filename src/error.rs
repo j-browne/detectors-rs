@@ -19,13 +19,13 @@ impl From<serde_json::Error> for Error {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "detectors-rs error")
+        write!(f, "raumlehre error")
     }
 }
 
 impl std::error::Error for Error {
     fn description(&self) -> &str {
-        "detectors-rs error"
+        "raumlehre error"
     }
 
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
