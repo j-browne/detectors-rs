@@ -10,6 +10,7 @@ use val_unc::ValUnc;
 pub use self::Base as Surface;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct Base {
     coords: CoordinateSystem,
     u_limits: (ValUnc, ValUnc),
@@ -116,6 +117,7 @@ impl Base {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct Group {
     surfaces: Vec<NotTemplate>,
     #[serde(
@@ -167,6 +169,7 @@ impl Group {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct Template {
     #[serde(rename = "template")]
     name: String,
