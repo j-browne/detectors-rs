@@ -2,21 +2,25 @@
 
 ## Getting Started
 
+raumlehre was written in rust, and the rust toolchain is required to build the
+project. To install rust, see [rustup].
 
-### Building
-
-### Running
-
-#### angles
-
-```
-cargo run --release --bin angles -- <input_files>
+To build and install the raumlehre tools, run
+```sh
+git clone git@github.com:j-browne/raumlehre.git
+cargo install --path raumlehre
 ```
 
-#### visualize
+### angles
 
+```sh
+angles <input_files>
 ```
-cargo run --release --bin visualize -- <input_files> > <output_file>
+
+### visualize
+
+```sh
+visualize <input_files> > <output_file>
 gnuplot -e "call 'utilities/visualize.gpi' '<output_file>'" -
 ```
 
@@ -99,3 +103,5 @@ gnuplot -e "call 'utilities/visualize.gpi' '<output_file>'" -
   }
 }
 ```
+
+[rustup]: https://rustup.rs
