@@ -446,8 +446,8 @@ mod tests {
 
         let f = |x: f64, y: f64| (x - 2.5).powi(2) + (y + 1.25).powi(2) + 4.0;
 
-        for ulim in [(-1.0, 1.0), (1.0, 3.0), (3.0, 10.0)].into_iter() {
-            for vlim in [(-10.0, -2.0), (-2.0, -1.0), (-1.0, 10.0)].into_iter() {
+        for ulim in &[(-1.0, 1.0), (1.0, 3.0), (3.0, 10.0)] {
+            for vlim in &[(-10.0, -2.0), (-2.0, -1.0), (-1.0, 10.0)] {
                 output.push(((ulim, vlim), minimize_2d(&f, *ulim, *vlim, 1e-6)));
             }
         }
