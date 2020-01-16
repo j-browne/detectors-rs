@@ -16,7 +16,7 @@ use structopt::StructOpt;
 use val_unc::ValUnc;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "detectors", no_version)]
+#[structopt(name = "angles", no_version)]
 /// A program to calculate detector properties.
 struct Opt {
     #[structopt(short, long)]
