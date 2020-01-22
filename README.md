@@ -1,5 +1,7 @@
 # raumlehre
 
+A package for calculating geometric properties of physics detectors.
+
 ## Getting Started
 
 raumlehre was written in rust, and the rust toolchain is required to build the
