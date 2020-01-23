@@ -7,6 +7,8 @@ description = "A package for calculating geometric properties of physics detecto
 repository = "https://github.com/j-browne/raumlehre"
 readme = "README.md"
 license = "GPL-3.0-or-later"
+keywords = ["science", "physics", "detectors", "geometry"]
+categories = ["science"]
 
 [dependencies]
 GSL = "*"
