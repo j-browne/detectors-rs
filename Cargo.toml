@@ -10,6 +10,9 @@ license = "GPL-3.0-or-later"
 keywords = ["science", "physics", "detectors", "geometry"]
 categories = ["science"]
 
+[profile.dev]
+opt-level = 1
+
 [dependencies]
 GSL = "*"
 nalgebra = "*"
