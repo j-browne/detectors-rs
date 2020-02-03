@@ -15,13 +15,35 @@
   "additionalProperties": false,
   "definitions": {
     "CoordinateSystem": {
-      "enum": [
-        "CartesianX",
-        "CartesianY",
-        "CartesianZ",
-        "PolarX",
-        "PolarY",
-        "PolarZ"
+      "anyOf": [
+        {
+          "enum": [
+            "CartesianX",
+            "CartesianY",
+            "CartesianZ",
+            "PolarX",
+            "PolarY",
+            "PolarZ"
+          ]
+        },
+        {
+          "type": "object",
+          "required": ["SphericalX"],
+          "properties": { "SphericalX": {"type": "number"}},
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["SphericalY"],
+          "properties": { "SphericalY": {"type": "number"}},
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["SphericalZ"],
+          "properties": { "SphericalZ": {"type": "number"}},
+          "additionalProperties": false
+        }
       ]
     },
     "Detector": {
