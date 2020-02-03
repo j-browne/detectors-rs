@@ -1,5 +1,7 @@
 # raumlehre
 
+[![Build Status](https://travis-ci.org/j-browne/raumlehre.svg?branch=master)](https://travis-ci.org/j-browne/raumlehre)
+
 A package for calculating geometric properties of physics detectors.
 
 ## Getting Started
