@@ -1,0 +1,9 @@
+{
+  "detectors": [
+    {
+      "coords": {"SphericalY": 1},
+      "u_limits": [70.0, 110.0],
+      "v_limits": [-45.0, 45.0]
+    }
+  ]
+}
