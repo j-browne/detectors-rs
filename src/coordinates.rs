@@ -1,7 +1,7 @@
+use crate::{statistics::randomize, unc::ValUnc};
 use nalgebra::{Point2, Point3, Rotation3, Translation3, Vector3};
 use rand::Rng;
 use std::ops::Mul;
-use val_unc::ValUnc;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum CoordinateSystem {
@@ -108,8 +108,16 @@ pub enum Transformation {
 impl Transformation {
     pub fn randomize<R: Rng>(&mut self, rng: &mut R) {
         *self = match self {
-            Rotation(r) => Rotation((r.0.rand(rng), r.1.rand(rng), r.2.rand(rng))),
-            Translation(t) => Translation((t.0.rand(rng), t.1.rand(rng), t.2.rand(rng))),
+            Rotation(r) => Rotation((
+                    randomize(r.0, rng),
+                    randomize(r.1, rng),
+                    randomize(r.2, rng),
+            )),
+            Translation(t) => Translation((
+                    randomize(t.0, rng),
+                    randomize(t.1, rng),
+                    randomize(t.2, rng),
+            )),
         };
     }
 

@@ -3,7 +3,7 @@ extern crate serde_derive;
 
 use nalgebra::Point3;
 use pbr::ProgressBar;
-use raumlehre::{config::Config, error::Error, statistics::stats};
+use raumlehre::{config::Config, error::Error, statistics::stats, unc::ValUnc};
 use rayon::prelude::*;
 use serde_json;
 use std::{
@@ -13,7 +13,6 @@ use std::{
     sync::Mutex,
 };
 use structopt::StructOpt;
-use val_unc::ValUnc;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "angles", no_version)]

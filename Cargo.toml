@@ -20,9 +20,10 @@ ndarray = "0.11.2"
 optimize = "*"
 pbr = "*"
 rand = "*"
+rand_distr = "*"
 rayon = "*"
 serde = "*"
 structopt = "*"
 serde_json = "*"
 serde_derive = "*"
-val_unc = { git = "https://github.com/j-browne/val_unc", features = ["serde", "rand"] }
+val_unc = { git = "https://github.com/j-browne/val_unc", features = ["serde"] }

@@ -1,14 +1,15 @@
 use crate::{
     error::Error,
     statistics::{stats, stats_vec},
-    surface::{MaybeTemplate, Surface},
+    surface::MaybeTemplate,
+    Surface,
+    unc::{Unc, ValUnc},
 };
 use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
 use std::{cell::RefCell, collections::HashMap, iter::repeat_with, sync::Arc};
-use val_unc::ValUnc;
 
 pub use self::Simplified as Detector;
 
@@ -316,7 +317,7 @@ impl Simplified {
         stats(&vals)
     }
 
-    pub fn dir_avg_unc(&self, steps: usize) -> (Vector3<f64>, Vector3<f64>) {
+    pub fn dir_avg_unc(&self, steps: usize) -> (Vector3<f64>, Vector3<Unc>) {
         let vals = repeat_with(|| self.rand().dir_avg())
             .take(steps)
             .collect::<Vec<_>>();

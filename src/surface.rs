@@ -1,11 +1,12 @@
 use crate::{
     coordinates::{CoordinateSystem, Transformation},
     error::Error,
+    unc::ValUnc,
+    statistics::randomize,
 };
 use nalgebra::{Point2, Point3};
 use rand::thread_rng;
 use std::collections::HashMap;
-use val_unc::ValUnc;
 
 pub use self::Base as Surface;
 
@@ -63,8 +64,8 @@ impl Base {
     pub fn randomize(&mut self) {
         let mut rng = thread_rng();
         let rng = &mut rng;
-        self.u_limits = (self.u_limits.0.rand(rng), self.u_limits.1.rand(rng));
-        self.v_limits = (self.v_limits.0.rand(rng), self.v_limits.1.rand(rng));
+        self.u_limits = (randomize(self.u_limits.0, rng), randomize(self.u_limits.1, rng));
+        self.v_limits = (randomize(self.v_limits.0, rng), randomize(self.v_limits.1, rng));
 
         for t in &mut self.trans {
             t.randomize(rng);

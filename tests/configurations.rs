@@ -16,6 +16,13 @@ fn empty_fields() {
 }
 
 #[test]
+fn end_cap_unc() {
+    let mut config = Config::new();
+    let cursor = Cursor::new(include_str!("configurations/pass/end_cap_unc.json"));
+    assert!(config.add_from_reader(cursor).is_ok());
+}
+
+#[test]
 fn end_cap() {
     let mut config = Config::new();
     let cursor = Cursor::new(include_str!("configurations/pass/end_cap.json"));
