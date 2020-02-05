@@ -1,6 +1,6 @@
 [package]
 name = "raumlehre"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Justin Browne"]
 edition = "2018"
 description = "A package for calculating geometric properties of physics detectors."
