@@ -8,10 +8,7 @@ pub fn stats(vals: &[f64]) -> ValUnc {
     let std_dev = (vals.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>()
         / ((vals.len() - 1) as f64))
         .sqrt();
-    ValUnc {
-        val: mean,
-        unc: std_dev.into(),
-    }
+    ValUnc::new(mean, std_dev.into())
 }
 
 pub fn stats_vec(vals: &[Vector3<f64>]) -> (Vector3<f64>, Vector3<Unc>) {
@@ -19,32 +16,19 @@ pub fn stats_vec(vals: &[Vector3<f64>]) -> (Vector3<f64>, Vector3<Unc>) {
     let vals_y = vals.iter().map(|x| x[1]).collect::<Vec<_>>();
     let vals_z = vals.iter().map(|x| x[2]).collect::<Vec<_>>();
 
-    let ValUnc {
-        val: val_x,
-        unc: unc_x,
-    } = stats(&vals_x);
-    let ValUnc {
-        val: val_y,
-        unc: unc_y,
-    } = stats(&vals_y);
-    let ValUnc {
-        val: val_z,
-        unc: unc_z,
-    } = stats(&vals_z);
+    let x = stats(&vals_x);
+    let y = stats(&vals_y);
+    let z = stats(&vals_z);
 
     (
-        Vector3::new(val_x, val_y, val_z),
-        Vector3::new(unc_x, unc_y, unc_z),
+        Vector3::new(x.val, y.val, z.val),
+        Vector3::new(x.unc, y.unc, z.unc),
     )
 }
 
-
 pub fn randomize<R: Rng>(v: ValUnc, rng: &mut R) -> ValUnc {
     if let Ok(norm) = Normal::new(v.val, v.unc.0.abs()) {
-        ValUnc {
-            val: norm.sample(rng),
-            unc: v.unc,
-        }
+        ValUnc::new(norm.sample(rng), v.unc)
     } else {
         v
     }

@@ -1,7 +1,37 @@
-use std::{convert::From, ops::{Div, Mul}};
+use std::ops::{Deref, DerefMut, Div, Mul};
 use val_unc::traits::*;
 
-pub type ValUnc = val_unc::ValUnc<f64, Unc>;
+mod val_unc_serde;
+
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default, Serialize, Deserialize)]
+#[repr(transparent)]
+pub struct ValUnc(#[serde(with = "val_unc_serde")] pub val_unc::ValUnc<f64, Unc>);
+
+impl ValUnc {
+    pub fn new(val: f64, unc: Unc) -> Self {
+        Self(val_unc::ValUnc { val, unc })
+    }
+}
+
+impl From<f64> for ValUnc {
+    fn from(v: f64) -> Self {
+        Self(val_unc::ValUnc::from(v))
+    }
+}
+
+impl Deref for ValUnc {
+    type Target = val_unc::ValUnc<f64, Unc>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for ValUnc {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -42,13 +72,20 @@ impl UncAdd<f64> for Unc {
 
 impl UncDiv<f64> for Unc {
     fn unc_div(self, self_val: f64, other: Unc, other_val: f64) -> Unc {
-        self_val / other_val * Unc(f64::sqrt(f64::powi(self.0 / self_val, 2) + f64::powi(other.0 / other_val, 2)))
+        self_val / other_val
+            * Unc(f64::sqrt(
+                f64::powi(self.0 / self_val, 2) + f64::powi(other.0 / other_val, 2),
+            ))
     }
 }
 
 impl UncMul<f64> for Unc {
     fn unc_mul(self, self_val: f64, other: Unc, other_val: f64) -> Unc {
-        self_val * other_val * Unc(f64::sqrt(f64::powi(self.0 / self_val, 2) + f64::powi(other.0 / other_val, 2)))
+        self_val
+            * other_val
+            * Unc(f64::sqrt(
+                f64::powi(self.0 / self_val, 2) + f64::powi(other.0 / other_val, 2),
+            ))
     }
 }
 

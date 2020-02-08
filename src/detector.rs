@@ -2,8 +2,8 @@ use crate::{
     error::Error,
     statistics::{stats, stats_vec},
     surface::MaybeTemplate,
-    Surface,
     unc::{Unc, ValUnc},
+    Surface,
 };
 use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};

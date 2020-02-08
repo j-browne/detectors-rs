@@ -10,6 +10,5 @@ pub mod surface;
 pub mod unc;
 
 pub use crate::{
-    config::Config, detector::Simplified as Detector, error::Error,
-    surface::Base as Surface,
+    config::Config, detector::Simplified as Detector, error::Error, surface::Base as Surface,
 };

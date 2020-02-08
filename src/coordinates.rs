@@ -76,19 +76,22 @@ impl CoordinateSystem {
                 Point3::new(rho, phi.to_degrees(), p[2])
             }
             CoordinateSystem::SphericalX(r) => {
-                let theta = f64::acos(p[0] / f64::sqrt(p[1].powi(2) + p[2].powi(2) + p[0].powi(2))).to_degrees();
+                let theta = f64::acos(p[0] / f64::sqrt(p[1].powi(2) + p[2].powi(2) + p[0].powi(2)))
+                    .to_degrees();
                 let phi = f64::atan2(p[2], p[1]).to_degrees();
                 let r_actual = f64::sqrt(p[1].powi(2) + p[2].powi(2) + p[0].powi(2));
                 Point3::new(theta, phi, r_actual - r)
             }
             CoordinateSystem::SphericalY(r) => {
-                let theta = f64::acos(p[1] / f64::sqrt(p[2].powi(2) + p[0].powi(2) + p[1].powi(2))).to_degrees();
+                let theta = f64::acos(p[1] / f64::sqrt(p[2].powi(2) + p[0].powi(2) + p[1].powi(2)))
+                    .to_degrees();
                 let phi = f64::atan2(p[0], p[2]).to_degrees();
                 let r_actual = f64::sqrt(p[2].powi(2) + p[0].powi(2) + p[1].powi(2));
                 Point3::new(theta, phi, r_actual - r)
             }
             CoordinateSystem::SphericalZ(r) => {
-                let theta = f64::acos(p[2] / f64::sqrt(p[0].powi(2) + p[1].powi(2) + p[2].powi(2))).to_degrees();
+                let theta = f64::acos(p[2] / f64::sqrt(p[0].powi(2) + p[1].powi(2) + p[2].powi(2)))
+                    .to_degrees();
                 let phi = f64::atan2(p[1], p[0]).to_degrees();
                 let r_actual = f64::sqrt(p[0].powi(2) + p[1].powi(2) + p[2].powi(2));
                 Point3::new(theta, phi, r_actual - r)
@@ -109,14 +112,14 @@ impl Transformation {
     pub fn randomize<R: Rng>(&mut self, rng: &mut R) {
         *self = match self {
             Rotation(r) => Rotation((
-                    randomize(r.0, rng),
-                    randomize(r.1, rng),
-                    randomize(r.2, rng),
+                randomize(r.0, rng),
+                randomize(r.1, rng),
+                randomize(r.2, rng),
             )),
             Translation(t) => Translation((
-                    randomize(t.0, rng),
-                    randomize(t.1, rng),
-                    randomize(t.2, rng),
+                randomize(t.0, rng),
+                randomize(t.1, rng),
+                randomize(t.2, rng),
             )),
         };
     }

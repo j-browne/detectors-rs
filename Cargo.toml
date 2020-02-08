@@ -26,4 +26,4 @@ serde = "*"
 structopt = "*"
 serde_json = "*"
 serde_derive = "*"
-val_unc = { git = "https://github.com/j-browne/val_unc", features = ["serde"] }
+val_unc = { version = "0.8.0", features = ["serde"] }
