@@ -26,4 +26,5 @@ serde = "*"
 structopt = "*"
 serde_json = "*"
 serde_derive = "*"
+thiserror = "*"
 val_unc = { version = "0.8.0", features = ["serde"] }
