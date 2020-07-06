@@ -23,21 +23,41 @@ struct Opt {
     files: Vec<PathBuf>,
 }
 
-fn main() -> Result<(), Error> {
+fn main() {
+    if let Err(e) = main_err() {
+        eprintln!("Error: {}", e);
+
+        let mut e = &e as &dyn std::error::Error;
+        while let Some(s) = e.source() {
+            eprintln!("Caused by: {}", s);
+            e = s;
+        }
+    }
+}
+
+fn main_err() -> Result<(), Error> {
     let opt = Opt::from_args();
     if opt.files.is_empty() {
         let mut out = stdout();
         Opt::clap()
             .write_long_help(&mut out)
             .expect("failed to write to stdout");
-        writeln!(&mut out)?;
+        writeln!(&mut out).map_err(|e| Error::Stdout { source: e })?;
         return Ok(());
     }
 
     let mut config = Config::new();
     for file_path in opt.files {
-        let file = File::open(file_path)?;
-        config.add_from_reader(file)?;
+        let file = File::open(&file_path).map_err(|e| Error::FileOpen {
+            filename: file_path.clone(),
+            source: e,
+        })?;
+        config
+            .add_from_reader(file)
+            .map_err(|e| Error::JsonDeserialize {
+                filename: file_path.clone(),
+                source: e,
+            })?;
     }
 
     let detectors = config.simplify()?;

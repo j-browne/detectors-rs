@@ -79,24 +79,42 @@ struct OutputData {
     solid_angle: ValUnc,
 }
 
-fn main() -> Result<(), Error> {
-    //rayon::ThreadPoolBuilder::new().num_threads(1).build_global().unwrap();
+fn main() {
+    if let Err(e) = main_err() {
+        eprintln!("Error: {}", e);
 
+        let mut e = &e as &dyn std::error::Error;
+        while let Some(s) = e.source() {
+            eprintln!("Caused by: {}", s);
+            e = s;
+        }
+    }
+}
+
+fn main_err() -> Result<(), Error> {
     let opt = Opt::from_args();
     if opt.files.is_empty() {
         let mut out = stdout();
         Opt::clap()
             .write_long_help(&mut out)
             .expect("failed to write to stdout");
-        writeln!(&mut out)?;
+        writeln!(&mut out).map_err(|e| Error::Stdout { source: e })?;
         return Ok(());
     }
     let quiet = opt.quiet;
 
     let mut config = Config::new();
     for file_path in opt.files {
-        let file = File::open(file_path)?;
-        config.add_from_reader(file)?;
+        let file = File::open(&file_path).map_err(|e| Error::FileOpen {
+            filename: file_path.clone(),
+            source: e,
+        })?;
+        config
+            .add_from_reader(file)
+            .map_err(|e| Error::JsonDeserialize {
+                filename: file_path.clone(),
+                source: e,
+            })?;
     }
 
     let detectors = config.simplify()?;
@@ -199,7 +217,10 @@ fn main() -> Result<(), Error> {
     output.sort_by_key(|x| x.det_id.get(1).copied().unwrap_or(0));
     output.sort_by_key(|x| x.det_id.get(0).copied().unwrap_or(0));
 
-    println!("{}", serde_json::to_string(&output)?);
+    println!(
+        "{}",
+        serde_json::to_string(&output).map_err(|e| Error::JsonSerialize { source: e })?
+    );
 
     Ok(())
 }

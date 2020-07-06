@@ -286,7 +286,7 @@ impl MaybeTemplate {
             MaybeTemplate::Template { template: t } => {
                 let mut temp = templates
                     .get(&t.name)
-                    .ok_or(Error::UnknownTemplate)?
+                    .ok_or(Error::UnknownTemplate(t.name.clone()))?
                     .clone();
                 temp.trans_mut().extend(self.trans().iter().cloned());
                 Ok(temp.apply_templates(templates)?)

@@ -19,7 +19,7 @@ impl Config {
         Self::default()
     }
 
-    pub fn add_from_reader<R: Read>(&mut self, reader: R) -> Result<(), Error> {
+    pub fn add_from_reader<R: Read>(&mut self, reader: R) -> Result<(), serde_json::Error> {
         let other: Self = serde_json::from_reader(reader)?;
         self.append(other);
         Ok(())
