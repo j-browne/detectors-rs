@@ -14,7 +14,7 @@ categories = ["science"]
 opt-level = 1
 
 [dependencies]
-GSL = "*"
+GSL = "1.1.0"
 nalgebra = "*"
 ndarray = "0.11.2"
 optimize = "*"
