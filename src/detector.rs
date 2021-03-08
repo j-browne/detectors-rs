@@ -9,7 +9,9 @@ use nalgebra::{Point2, Point3, Vector3};
 use ndarray::{Array, ArrayView1};
 use optimize::{Minimizer, NelderMeadBuilder};
 use rgsl::{numerical_differentiation::deriv_central, IntegrationWorkspace};
-use std::{cell::RefCell, collections::HashMap, iter::repeat_with, sync::Arc};
+#[cfg(feature = "memoize")]
+use std::{cell::RefCell, sync::Arc};
+use std::{collections::HashMap, iter::repeat_with};
 
 pub use self::Simplified as Detector;
 
@@ -47,6 +49,7 @@ impl Raw {
                 Simplified {
                     surface: d,
                     shadows: shadows.clone(),
+                    #[cfg(feature = "memoize")]
                     solid_angle: Default::default(),
                 },
             )
@@ -61,6 +64,7 @@ pub struct Simplified {
     surface: Surface,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     shadows: Vec<Surface>,
+    #[cfg(feature = "memoize")]
     #[serde(skip)]
     solid_angle: RefCell<Arc<Option<f64>>>,
 }
@@ -213,6 +217,7 @@ impl Simplified {
         r.dot(&ds).abs() / r.norm().powi(3)
     }
 
+    #[cfg(feature = "memoize")]
     pub fn solid_angle(&self) -> f64 {
         if self.solid_angle.borrow().is_none() {
             let _ = self
@@ -222,6 +227,11 @@ impl Simplified {
         self.solid_angle
             .borrow()
             .expect("solid angle is still None after being set")
+    }
+
+    #[cfg(not(feature = "memoize"))]
+    pub fn solid_angle(&self) -> f64 {
+        self.solid_angle_calculate()
     }
 
     pub fn solid_angle_calculate(&self) -> f64 {
@@ -337,6 +347,7 @@ impl Clone for Simplified {
         Self {
             surface: self.surface.clone(),
             shadows: self.shadows.clone(),
+            #[cfg(feature = "memoize")]
             solid_angle: Default::default(),
         }
     }
