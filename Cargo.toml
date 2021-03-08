@@ -10,6 +10,10 @@ license = "GPL-3.0-or-later"
 keywords = ["science", "physics", "detectors", "geometry"]
 categories = ["science"]
 
+[features]
+default = ["memoize"]
+memoize = []
+
 [profile.dev]
 opt-level = 1
 
