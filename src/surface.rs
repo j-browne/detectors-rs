@@ -101,25 +101,16 @@ impl Base {
         self.coords.world_to_local(p)
     }
 
-    // TODO: If the two z values are the same you can get inf.
     pub fn intersects(&self, p_src_world: Point3<f64>, p_dest_world: Point3<f64>) -> bool {
-        let p1 = self.coords_world_to_local(p_dest_world);
-        let p2 = self.coords_world_to_local(p_src_world);
+        let mut p_src = p_src_world;
+        let mut p_dest = p_dest_world;
+        for t in self.trans.iter().rev() {
+            p_src = t.inverse() * p_src;
+            p_dest = t.inverse() * p_dest;
+        }
 
-        let int = Point2::new(
-            -(p1.x - p2.x) / (p1.z - p2.z) * p1.z + p1.x,
-            -(p1.y - p2.y) / (p1.z - p2.z) * p1.z + p1.y,
-        );
-
-        // Make sure the point is within u and v limits
-        //  AND the surface is between src and dest
-        let u_limits = self.u_limits_val();
-        let v_limits = self.v_limits_val();
-        int.x >= u_limits.0
-            && int.x <= u_limits.1
-            && int.y >= v_limits.0
-            && int.y <= v_limits.1
-            && (p1.z.signum() * p2.z.signum() - -1.0).abs() < std::f64::EPSILON
+        self.coords
+            .intersects(p_src, p_dest, self.u_limits_val(), self.v_limits_val())
     }
 }
 
